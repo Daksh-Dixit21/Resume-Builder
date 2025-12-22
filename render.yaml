@@ -21,15 +21,3 @@ services:
         sync: false
       - key: OPENAI_API_KEY
         sync: false
-  - type: web                 
-    name: resume-client
-    env: static            
-    buildCommand: npm install && npm run build
-    staticPublishPath: ./dist 
-    rootDir: client
-    envVars:
-      - key: VITE_BASE_URL
-        fromService:
-          type: web
-          name: resume-server
-          property: url
