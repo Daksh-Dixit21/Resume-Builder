@@ -45,82 +45,97 @@ const ModernTemplate = ({ data, accentColor }) => {
     };
 
 	return (
-		<div className="max-w-4xl mx-auto bg-white text-gray-800">
+		<div className="w-full bg-white text-gray-800">
 			{/* Header */}
 			<header className="pb-5 pt-6 pl-6 pr-6 text-white" style={{ backgroundColor: accentColor }} aria-label="Personal Information">
-				<h1 className="text-3xl font-light mb-4">
+				<h1 className="text-3xl font-light mb-1">
 					{data.personal_info?.full_name || "Your Name"}
 				</h1>
+				{data.personal_info?.profession && (
+					<p className="text-sm font-medium opacity-90 mb-4 uppercase tracking-wider">{data.personal_info.profession}</p>
+				)}
 
-				<div className="flex flex-wrap gap-3 text-sm">
+				<ul className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] list-none p-0 m-0" aria-label="Contact Details">
 					{data.personal_info?.email && (
-						<a 
-							href={`mailto:${data.personal_info.email}`}
-							aria-label="Email Address"
-							title="Email"
-							className="flex items-center gap-1"
-						>
-							<Mail className="size-3" aria-label="Email Logo" role="img" />
-							<span>{data.personal_info.email}</span>
-						</a>
+						<li>
+							<a 
+								href={`mailto:${data.personal_info.email}`}
+								aria-label="Email Address"
+								title="Email"
+								className="flex items-center gap-1"
+							>
+								<Mail className="size-3 shrink-0" aria-hidden="true" />
+								<span>{data.personal_info.email}</span>
+							</a>
+						</li>
 					)}
 					{data.personal_info?.phone && (
-						<a 
-							href={`tel:${data.personal_info.phone}`}
-							aria-label="Phone Number"
-							title="Phone"
-							className="flex items-center gap-1"
-						>
-							<Phone className="size-3" aria-label="Phone Logo" role="img" />
-							<span>{data.personal_info.phone}</span>
-						</a>
+						<li>
+							<a 
+								href={`tel:${data.personal_info.phone}`}
+								aria-label="Phone Number"
+								title="Phone"
+								className="flex items-center gap-1"
+							>
+								<Phone className="size-3 shrink-0" aria-hidden="true" />
+								<span>{data.personal_info.phone}</span>
+							</a>
+						</li>
 					)}
 					{data.personal_info?.location && (
-						<div className="flex items-center gap-1">
-							<MapPin className="size-3" aria-label="Location Logo" role="img" />
-							<span>{data.personal_info.location}</span>
-						</div>
+						<li>
+							<div className="flex items-center gap-1">
+								<MapPin className="size-3 shrink-0" aria-hidden="true" />
+								<span>{data.personal_info.location}</span>
+							</div>
+						</li>
 					)}
 					{data.personal_info?.linkedin && (
-						<a 
-							href={getLoginUrl(data.personal_info.linkedin, 'linkedin')}
-							target="_blank" 
-							rel="noopener noreferrer" 
-							aria-label="LinkedIn Profile"
-							title="LinkedIn"
-							className="flex items-center gap-1"
-						>
-							<Linkedin className="size-3" aria-label="LinkedIn Logo" role="img" />
-							<span className="break-all text-xs">{getDisplayUsername(data.personal_info.linkedin)}</span>
-						</a>
+						<li>
+							<a 
+								href={getLoginUrl(data.personal_info.linkedin, 'linkedin')}
+								target="_blank" 
+								rel="noopener noreferrer" 
+								aria-label="LinkedIn Profile"
+								title="LinkedIn"
+								className="flex items-center gap-1"
+							>
+								<Linkedin className="size-3 shrink-0" aria-hidden="true" />
+								<span>linkedin.com/in/{getDisplayUsername(data.personal_info.linkedin)}</span>
+							</a>
+						</li>
 					)}
 					{data.personal_info?.github && (
-						<a 
-							href={getLoginUrl(data.personal_info.github, 'github')} 
-							target="_blank" 
-							rel="noopener noreferrer"
-							aria-label="GitHub Profile"
-							title="GitHub"
-							className="flex items-center gap-1"
-						>
-							<Github className="size-3" aria-label="GitHub Logo" role="img" />
-							<span className="break-all text-xs">{getDisplayUsername(data.personal_info.github)}</span>
-						</a>
+						<li>
+							<a 
+								href={getLoginUrl(data.personal_info.github, 'github')} 
+								target="_blank" 
+								rel="noopener noreferrer"
+								aria-label="GitHub Profile"
+								title="GitHub"
+								className="flex items-center gap-1"
+							>
+								<Github className="size-3 shrink-0" aria-hidden="true" />
+								<span>github.com/{getDisplayUsername(data.personal_info.github)}</span>
+							</a>
+						</li>
 					)}
 					{data.personal_info?.website && (
-						<a 
-							href={getLoginUrl(data.personal_info.website, 'website')} 
-							target="_blank" 
-							rel="noopener noreferrer"
-							aria-label="Personal Website"
-							title="Website"
-							className="flex items-center gap-1"
-						>
-							<Globe className="size-3" aria-label="Website Logo" role="img" />
-							<span className="break-all text-xs">{getDisplayUsername(data.personal_info.website)}</span>
-						</a>
+						<li>
+							<a 
+								href={getLoginUrl(data.personal_info.website, 'website')} 
+								target="_blank" 
+								rel="noopener noreferrer"
+								aria-label="Personal Website"
+								title="Website"
+								className="flex items-center gap-1"
+							>
+								<Globe className="size-3 shrink-0" aria-hidden="true" />
+								<span>{getDisplayUsername(data.personal_info.website)}</span>
+							</a>
+						</li>
 					)}
-				</div>
+				</ul>
 			</header>
 
 			<div className="p-6">
@@ -130,7 +145,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 						<h2 id="summary-heading" className="text-xl font-semibold mb-3 pb-2 border-b-2 text-gray-800" style={{ borderColor: accentColor }}>
 							Professional Summary
 						</h2>
-						<p className="text-gray-700 text-sm text-justify">{data.professional_summary}</p>
+						<p className="text-gray-700 text-sm text-justify whitespace-pre-wrap">{data.professional_summary}</p>
 					</section>
 				)}
 
@@ -149,17 +164,42 @@ const ModernTemplate = ({ data, accentColor }) => {
 										<div>
 											<h3 className="font-medium text-gray-900">
 												{exp.position} <span className="text-gray-600">|</span> <span style={{ color: accentColor }}>{exp.company}</span>
+                                                {exp.link && (
+                                                    <a 
+                                                        href={exp.link} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer" 
+                                                        aria-label={`Visit ${exp.company} website`}
+                                                        className="inline-flex items-center ml-2 text-gray-500 hover:text-gray-700"
+                                                    >
+                                                        <ExternalLink className="size-3" />
+                                                    </a>
+                                                )}
 											</h3>
 										</div>
 										<div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded">
-                                            <span aria-label={`From ${formatDateForAria(exp.start_date)} to ${exp.is_current ? "Present" : formatDateForAria(exp.end_date)}`}>
-											    {formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
+                                            <span aria-label={`From ${formatDateForAria(exp.start_date)}${exp.is_current ? " to Present" : exp.end_date ? ` to ${formatDateForAria(exp.end_date)}` : ""}`}>
+											    {formatDate(exp.start_date)}
+                                                {(exp.is_current || exp.end_date) && ` - ${exp.is_current ? "Present" : formatDate(exp.end_date)}`}
                                             </span>
 										</div>
 									</div>
 									{exp.description && (
-										<div className="text-gray-700 leading-relaxed mt-3 whitespace-pre-line text-sm text-justify">
-											{exp.description}
+										<div className="mt-3">
+                                            {(() => {
+                                                const lines = exp.description.split(/\r?\n/).filter(line => line.trim().length > 0);
+                                                return lines.length > 1 ? (
+                                                    <ul className="list-disc pl-5 space-y-1">
+                                                        {lines.map((line, idx) => (
+                                                            <li key={idx} style={{ color: accentColor }}>
+                                                                <span className="text-gray-700 text-sm text-justify block">{line}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                ) : (
+                                                    <p className="text-gray-700 leading-relaxed whitespace-pre-line text-sm text-justify">{exp.description}</p>
+                                                );
+                                            })()}
 										</div>
 									)}
 								</div>
@@ -245,20 +285,75 @@ const ModernTemplate = ({ data, accentColor }) => {
 					{data.skills && data.skills.length > 0 && (
 						<section aria-labelledby="skills-heading">
 							<h2 id="skills-heading" className="text-xl font-semibold mb-3 pb-2 border-b-2 text-gray-800" style={{ borderColor: accentColor }}>
-								Skills & Technologies
+								Skills and Technologies
 							</h2>
 
 							<ul className="flex flex-wrap gap-2 list-none p-0">
-								{data.skills.map((skill, index) => (
-									<li
-										key={index}
-										className="px-2 py-1 text-xs text-white rounded-full"
-										style={{ backgroundColor: accentColor }}
-									>
-										{skill}
-									</li>
-								))}
+								{data.skills.map((skill, index) => {
+                                    const hasColon = skill.includes(':');
+                                    if (hasColon) {
+                                        const [category, items] = skill.split(/:(.+)/);
+                                        return (
+                                            <li
+                                                key={index}
+                                                className="w-full px-3 py-2 text-sm text-white rounded-md"
+                                                style={{ backgroundColor: accentColor }}
+                                            >
+                                                <span className="font-bold block sm:inline mr-2">{category.trim()}:</span>
+                                                <span className="opacity-95">{items ? items.trim() : ""}</span>
+                                            </li>
+                                        );
+                                    }
+									return (
+                                        <li
+                                            key={index}
+                                            className="px-2 py-1 text-xs text-white rounded-full"
+                                            style={{ backgroundColor: accentColor }}
+                                        >
+                                            {skill}
+                                        </li>
+                                    );
+                                })}
 							</ul>
+						</section>
+					)}
+
+					{/* Certifications */}
+					{data.certifications && data.certifications.length > 0 && (
+						<section aria-labelledby="certifications-heading">
+							<h2 id="certifications-heading" className="text-xl font-semibold mb-3 pb-2 border-b-2 text-gray-800" style={{ borderColor: accentColor }}>
+								Certifications
+							</h2>
+
+							<div className="space-y-2">
+								{data.certifications.map((cert, index) => (
+									<div key={index}>
+										<div className="flex items-center justify-between">
+											<h3 className="text-sm font-semibold text-gray-900">{cert.name}</h3>
+											<span className="text-xs text-gray-500">{formatDate(cert.date)}</span>
+										</div>
+										<p className="text-xs" style={{ color: accentColor }}>{cert.issuer}</p>
+									</div>
+								))}
+							</div>
+						</section>
+					)}
+
+					{/* Languages */}
+					{data.languages && data.languages.length > 0 && (
+						<section aria-labelledby="languages-heading">
+							<h2 id="languages-heading" className="text-xl font-semibold mb-3 pb-2 border-b-2 text-gray-800" style={{ borderColor: accentColor }}>
+								Languages
+							</h2>
+
+							<div className="flex flex-wrap gap-x-4 gap-y-2">
+								{data.languages.map((lang, index) => (
+									<div key={index} className="flex items-center gap-2">
+										<span className="text-sm font-semibold text-gray-900">{lang.name}</span>
+										{lang.level && <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">{lang.level}</span>}
+									</div>
+								))}
+							</div>
 						</section>
 					)}
 				</div>

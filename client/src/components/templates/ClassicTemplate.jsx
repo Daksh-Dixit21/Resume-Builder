@@ -45,14 +45,17 @@ const ClassicTemplate = ({ data, accentColor }) => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-white text-gray-800 leading-relaxed">
+        <div className="w-full p-6 bg-white text-gray-800 leading-relaxed">
             {/* Header */}
             <header className="text-center mb-6 pb-4 border-b-2" style={{ borderColor: accentColor }} aria-label="Personal Information">
-                <h1 className="text-2xl font-bold mb-2" style={{ color: accentColor }}>
+                <h1 className="text-2xl font-bold mb-1" style={{ color: accentColor }}>
                     {data.personal_info?.full_name || "Your Name"}
                 </h1>
+                {data.personal_info?.profession && (
+                    <p className="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-widest">{data.personal_info.profession}</p>
+                )}
 
-                <div className="flex justify-center gap-2 text-xs text-gray-600">
+                <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-xs text-gray-600">
                     {data.personal_info?.email && (
                         <a 
                             href={`mailto:${data.personal_info.email}`} 
@@ -91,7 +94,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
                             className="flex items-center gap-1"
                         >
                             <Linkedin className="size-3" aria-label="LinkedIn Logo" role="img" />
-                            <span className="break-all">{getDisplayUsername(data.personal_info.linkedin)}</span>
+                            <span>{getDisplayUsername(data.personal_info.linkedin)}</span>
                         </a>
                     )}
                     {data.personal_info?.github && (
@@ -104,7 +107,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
                             className="flex items-center gap-1"
                         >
                             <Github className="size-3" aria-label="GitHub Logo" role="img" />
-                            <span className="break-all">{getDisplayUsername(data.personal_info.github)}</span>
+                            <span>{getDisplayUsername(data.personal_info.github)}</span>
                         </a>
                     )}
                     {data.personal_info?.website && (
@@ -117,7 +120,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
                             className="flex items-center gap-1"
                         >
                             <Globe className="size-3" aria-label="Website Logo" role="img" />
-                            <span className="break-all">{getDisplayUsername(data.personal_info.website)}</span>
+                            <span>{getDisplayUsername(data.personal_info.website)}</span>
                         </a>
                     )}
                 </div>
@@ -146,11 +149,25 @@ const ClassicTemplate = ({ data, accentColor }) => {
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
                                         <h3 className="font-semibold text-gray-900">{exp.position}</h3>
-                                        <p className="text-gray-700 font-medium">{exp.company}</p>
+                                        <p className="text-gray-700 font-medium flex items-center gap-2">
+                                            {exp.company}
+                                            {exp.link && (
+                                                <a 
+                                                    href={exp.link} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer" 
+                                                    aria-label={`Visit ${exp.company} website`}
+                                                    className="text-gray-500 hover:text-gray-700"
+                                                >
+                                                    <ExternalLink className="size-3" />
+                                                </a>
+                                            )}
+                                        </p>
                                     </div>
                                     <div className="text-right text-sm text-gray-600">
-                                        <p aria-label={`From ${formatDateForAria(exp.start_date)} to ${exp.is_current ? "Present" : formatDateForAria(exp.end_date)}`}>
-                                            {formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
+                                        <p aria-label={`From ${formatDateForAria(exp.start_date)}${exp.is_current ? " to Present" : exp.end_date ? ` to ${formatDateForAria(exp.end_date)}` : ""}`}>
+                                            {formatDate(exp.start_date)}
+                                            {(exp.is_current || exp.end_date) && ` - ${exp.is_current ? "Present" : formatDate(exp.end_date)}`}
                                         </p>
                                     </div>
                                 </div>
@@ -237,6 +254,47 @@ const ClassicTemplate = ({ data, accentColor }) => {
                         {data.skills.map((skill, index) => (
                             <li key={index} className="text-gray-700">
                                 • {skill}
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )}
+
+            {/* Certifications */}
+            {data.certifications && data.certifications.length > 0 && (
+                <section className="mb-6" aria-labelledby="certifications-heading">
+                    <h2 id="certifications-heading" className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
+                        CERTIFICATIONS
+                    </h2>
+
+                    <div className="space-y-3">
+                        {data.certifications.map((cert, index) => (
+                            <div key={index} className="flex justify-between items-start">
+                                <div>
+                                    <h3 className="font-semibold text-gray-900">{cert.name}</h3>
+                                    <p className="text-gray-700">{cert.issuer}</p>
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                    <p>{formatDate(cert.date)}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* Languages */}
+            {data.languages && data.languages.length > 0 && (
+                <section className="mb-6" aria-labelledby="languages-heading">
+                    <h2 id="languages-heading" className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
+                        LANGUAGES
+                    </h2>
+
+                    <ul className="flex gap-6 flex-wrap list-none p-0">
+                        {data.languages.map((lang, index) => (
+                            <li key={index} className="text-gray-700">
+                                <span className="font-semibold">{lang.name}</span>
+                                {lang.level && <span className="text-gray-500 text-sm ml-2">({lang.level})</span>}
                             </li>
                         ))}
                     </ul>

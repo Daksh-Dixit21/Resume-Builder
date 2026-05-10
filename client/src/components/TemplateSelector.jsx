@@ -21,8 +21,13 @@ const TemplateSelector = ({selectedTemplate, onChange}) => {
     },
     {
         id: "minimal",
-        name: "minimal",
+        name: "Minimal",
         preview: "Ultra-clean design that puts your content front and center"
+    },
+    {
+        id: "professional",
+        name: "Professional",
+        preview: "Bold, executive-style template with a strong hierarchical structure"
     }
   ]
   return (

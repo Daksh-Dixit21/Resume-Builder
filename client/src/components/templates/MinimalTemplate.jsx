@@ -45,14 +45,17 @@ const MinimalTemplate = ({ data, accentColor }) => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-white text-gray-900 font-light">
+        <div className="w-full p-6 bg-white text-gray-900 font-light">
             {/* Header */}
             <header className="mb-6" aria-label="Personal Information">
-                <h1 className="text-3xl font-thin mb-3 tracking-wide">
+                <h1 className="text-3xl font-thin mb-1 tracking-wide">
                     {data.personal_info?.full_name || "Your Name"}
                 </h1>
+                {data.personal_info?.profession && (
+                    <p className="text-sm font-medium text-gray-500 mb-4 uppercase tracking-[0.2em]">{data.personal_info.profession}</p>
+                )}
 
-                <div className="flex gap-2 text-xs text-gray-600">
+                <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-600">
                     {data.personal_info?.email && (
                         <a 
                             href={`mailto:${data.personal_info.email}`} 
@@ -91,7 +94,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
                             className="flex items-center gap-1"
                         >
                             <Linkedin size={12} aria-label="LinkedIn Logo" role="img" />
-                            <span className="break-all">{getDisplayUsername(data.personal_info.linkedin)}</span>
+                            <span>{getDisplayUsername(data.personal_info.linkedin)}</span>
                         </a>
                     )}
                     {data.personal_info?.github && (
@@ -104,7 +107,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
                             className="flex items-center gap-1"
                         >
                             <Github size={12} aria-label="GitHub Logo" role="img" />
-                            <span className="break-all">{getDisplayUsername(data.personal_info.github)}</span>
+                            <span>{getDisplayUsername(data.personal_info.github)}</span>
                         </a>
                     )}
                     {data.personal_info?.website && (
@@ -117,7 +120,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
                             className="flex items-center gap-1"
                         >
                             <Globe size={12} aria-label="Website Logo" role="img" />
-                            <span className="break-all">{getDisplayUsername(data.personal_info.website)}</span>
+                            <span>{getDisplayUsername(data.personal_info.website)}</span>
                         </a>
                     )}
                 </div>
@@ -145,11 +148,25 @@ const MinimalTemplate = ({ data, accentColor }) => {
                             <div key={index}>
                                 <div className="flex justify-between items-baseline mb-1">
                                     <h3 className="text-sm font-medium">{exp.position}</h3>
-                                    <span className="text-sm text-gray-500" aria-label={`From ${formatDateForAria(exp.start_date)} to ${exp.is_current ? "Present" : formatDateForAria(exp.end_date)}`}>
-                                        {formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
+                                    <span className="text-sm text-gray-500" aria-label={`From ${formatDateForAria(exp.start_date)}${exp.is_current ? " to Present" : exp.end_date ? ` to ${formatDateForAria(exp.end_date)}` : ""}`}>
+                                        {formatDate(exp.start_date)}
+                                        {(exp.is_current || exp.end_date) && ` - ${exp.is_current ? "Present" : formatDate(exp.end_date)}`}
                                     </span>
                                 </div>
-                                <p className="text-gray-600 mb-2">{exp.company}</p>
+                                <p className="text-gray-600 mb-2 flex items-center gap-2">
+                                    {exp.company}
+                                    {exp.link && (
+                                        <a 
+                                            href={exp.link} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer" 
+                                            aria-label={`Visit ${exp.company} website`}
+                                            className="text-gray-500 hover:text-gray-700"
+                                        >
+                                            <ExternalLink className="size-3" />
+                                        </a>
+                                    )}
+                                </p>
                                 {exp.description && (
                                     <div className="text-gray-700 leading-relaxed whitespace-pre-line">
                                         {exp.description}
@@ -220,7 +237,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
 
             {/* Skills */}
             {data.skills && data.skills.length > 0 && (
-                <section aria-labelledby="skills-heading">
+                <section className="mb-6" aria-labelledby="skills-heading">
                     <h2 id="skills-heading" className="text-sm uppercase tracking-widest mb-4 font-semibold text-gray-800" style={{ color: accentColor }}>
                         Skills
                     </h2>
@@ -233,6 +250,42 @@ const MinimalTemplate = ({ data, accentColor }) => {
                             </li>
                         ))}
                     </ul>
+                </section>
+            )}
+
+            {/* Certifications */}
+            {data.certifications && data.certifications.length > 0 && (
+                <section className="mb-6" aria-labelledby="certifications-heading">
+                    <h2 id="certifications-heading" className="text-sm uppercase tracking-widest mb-4 font-semibold text-gray-800" style={{ color: accentColor }}>
+                        Certifications
+                    </h2>
+                    <div className="space-y-2">
+                        {data.certifications.map((cert, index) => (
+                            <div key={index} className="flex justify-between items-baseline">
+                                <p className="text-sm text-gray-700">
+                                    <span className="font-medium">{cert.name}</span> — {cert.issuer}
+                                </p>
+                                <span className="text-xs text-gray-500">{formatDate(cert.date)}</span>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* Languages */}
+            {data.languages && data.languages.length > 0 && (
+                <section className="mb-6" aria-labelledby="languages-heading">
+                    <h2 id="languages-heading" className="text-sm uppercase tracking-widest mb-4 font-semibold text-gray-800" style={{ color: accentColor }}>
+                        Languages
+                    </h2>
+                    <div className="flex flex-wrap gap-x-6 gap-y-2">
+                        {data.languages.map((lang, index) => (
+                            <div key={index} className="text-sm text-gray-700">
+                                <span className="font-medium">{lang.name}</span>
+                                {lang.level && <span className="text-gray-500 ml-1.5">({lang.level})</span>}
+                            </div>
+                        ))}
+                    </div>
                 </section>
             )}
         </div>

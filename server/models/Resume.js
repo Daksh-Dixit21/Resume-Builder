@@ -46,6 +46,20 @@ experience: [
     gpa: {type: String},
   }
   ],
+  certifications: [
+  {
+    name: { type: String },
+    issuer: {type: String},
+    date: {type: String},
+    link: {type: String},
+  }
+  ],
+  languages: [
+  {
+    name: { type: String },
+    level: {type: String}, // e.g. Native, Fluent, Intermediate
+  }
+  ],
 }, {timestamps: true, minimize: false})
 
 const Resume = mongoose.model('Resume', ResumeSchema)

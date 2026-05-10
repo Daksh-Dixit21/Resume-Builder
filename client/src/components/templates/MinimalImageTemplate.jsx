@@ -45,7 +45,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
     };
 
     return (
-        <div className="max-w-5xl mx-auto bg-white text-zinc-800">
+        <div className="w-full bg-white text-zinc-800">
             <div className="grid grid-cols-3">
 
                 <div className="col-span-1  py-10">
@@ -82,7 +82,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                         <h2 className="text-sm font-semibold tracking-widest text-zinc-600 mb-3">
                             CONTACT
                         </h2>
-                        <div className="space-y-1 text-xs">
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
                             {data.personal_info?.phone && (
                                 <a 
                                     href={`tel:${data.personal_info.phone}`}
@@ -121,7 +121,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                                     className="flex items-center gap-1"
                                 >
                                     <Linkedin size={12} style={{ color: accentColor }} aria-label="LinkedIn Logo" role="img" />
-                                    <span className="break-all">{getDisplayUsername(data.personal_info.linkedin)}</span>
+                                    <span>{getDisplayUsername(data.personal_info.linkedin)}</span>
                                 </a>
                             )}
                             {data.personal_info?.github && (
@@ -134,7 +134,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                                     className="flex items-center gap-1"
                                 >
                                     <Github size={12} style={{ color: accentColor }} aria-label="GitHub Logo" role="img" />
-                                    <span className="break-all">{getDisplayUsername(data.personal_info.github)}</span>
+                                    <span>{getDisplayUsername(data.personal_info.github)}</span>
                                 </a>
                             )}
                             {data.personal_info?.website && (
@@ -147,7 +147,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                                     className="flex items-center gap-1"
                                 >
                                     <Globe size={12} style={{ color: accentColor }} aria-label="Website Logo" role="img" />
-                                    <span className="break-all">{getDisplayUsername(data.personal_info.website)}</span>
+                                    <span>{getDisplayUsername(data.personal_info.website)}</span>
                                 </a>
                             )}
                         </div>
@@ -175,7 +175,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
 
                     {/* Skills */}
                     {data.skills && data.skills.length > 0 && (
-                        <section aria-labelledby="skills-heading">
+                        <section className="mb-8" aria-labelledby="skills-heading">
                             <h2 id="skills-heading" className="text-sm font-semibold tracking-widest text-zinc-600 mb-3">
                                 SKILLS
                             </h2>
@@ -184,6 +184,41 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                                     <li key={index}>{skill}</li>
                                 ))}
                             </ul>
+                        </section>
+                    )}
+
+                    {/* Certifications */}
+                    {data.certifications && data.certifications.length > 0 && (
+                        <section className="mb-8" aria-labelledby="certifications-heading">
+                            <h2 id="certifications-heading" className="text-sm font-semibold tracking-widest text-zinc-600 mb-3">
+                                CERTIFICATIONS
+                            </h2>
+                            <div className="space-y-3 text-sm">
+                                {data.certifications.map((cert, index) => (
+                                    <div key={index}>
+                                        <p className="font-semibold uppercase">{cert.name}</p>
+                                        <p className="text-zinc-600 text-xs">{cert.issuer}</p>
+                                        <p className="text-xs text-zinc-500">{formatDate(cert.date)}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Languages */}
+                    {data.languages && data.languages.length > 0 && (
+                        <section className="mb-8" aria-labelledby="languages-heading">
+                            <h2 id="languages-heading" className="text-sm font-semibold tracking-widest text-zinc-600 mb-3">
+                                LANGUAGES
+                            </h2>
+                            <div className="space-y-1 text-sm">
+                                {data.languages.map((lang, index) => (
+                                    <div key={index} className="flex justify-between items-center">
+                                        <span className="font-medium uppercase">{lang.name}</span>
+                                        {lang.level && <span className="text-zinc-500 text-xs italic">{lang.level}</span>}
+                                    </div>
+                                ))}
+                            </div>
                         </section>
                     )}
                 </aside>
@@ -216,13 +251,24 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                                             <h3 className="font-semibold text-zinc-900">
                                                 {exp.position}
                                             </h3>
-                                            <span className="text-xs text-zinc-500" aria-label={`From ${formatDateForAria(exp.start_date)} to ${exp.is_current ? "Present" : formatDateForAria(exp.end_date)}`}>
-                                                {formatDate(exp.start_date)} -{" "}
-                                                {exp.is_current ? "Present" : formatDate(exp.end_date)}
+                                            <span className="text-xs text-zinc-500" aria-label={`From ${formatDateForAria(exp.start_date)}${exp.is_current ? " to Present" : exp.end_date ? ` to ${formatDateForAria(exp.end_date)}` : ""}`}>
+                                                {formatDate(exp.start_date)}
+                                                {(exp.is_current || exp.end_date) && ` - ${exp.is_current ? "Present" : formatDate(exp.end_date)}`}
                                             </span>
                                         </div>
-                                        <p className="text-sm mb-2" style={{ color: accentColor }} >
+                                        <p className="text-sm mb-2 flex items-center gap-2" style={{ color: accentColor }} >
                                             {exp.company}
+                                            {exp.link && (
+                                                <a 
+                                                    href={exp.link} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer" 
+                                                    aria-label={`Visit ${exp.company} website`}
+                                                    className="text-gray-500 hover:text-gray-700"
+                                                >
+                                                    <ExternalLink className="size-3" />
+                                                </a>
+                                            )}
                                         </p>
                                         {exp.description && (
                                             <ul className="list-disc list-inside text-sm text-zinc-700 leading-relaxed space-y-1">

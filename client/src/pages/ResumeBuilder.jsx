@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeftIcon, Briefcase, ChevronLeft, ChevronRight, DownloadIcon, EyeIcon, EyeOffIcon, FileText, FolderIcon, GraduationCap, Loader2, Share2Icon, Sparkles, User } from 'lucide-react'
+import { Activity, AlertCircle, ArrowLeftIcon, Award, Briefcase, CheckCircle2, ChevronLeft, ChevronRight, DownloadIcon, EyeIcon, EyeOffIcon, FileText, FolderIcon, GraduationCap, Info, Languages, Loader2, Share2Icon, Sparkles, User, X } from 'lucide-react'
 import Confetti from 'react-confetti'
 import PersonalInfoForm from '../components/PersonalInfoForm'
 import ResumePreview from '../components/ResumePreview'
@@ -11,6 +11,8 @@ import ExperienceForm from '../components/ExperienceForm'
 import EducationForm from '../components/EducationForm'
 import ProjectForm from '../components/ProjectForm'
 import SkillsForm from '../components/SkillsForm'
+import CertificationForm from '../components/CertificationForm'
+import LanguageForm from '../components/LanguageForm'
 import api from '../configs/api'
 
 const ResumeBuilder = () => {
@@ -24,6 +26,8 @@ const ResumeBuilder = () => {
     education: [],
     project: [],
     skills: [],
+    certifications: [],
+    languages: [],
     template: "classic",
     accent_color: "#3B82F6",
     public: false,
@@ -47,6 +51,9 @@ const ResumeBuilder = () => {
   const [showConfetti, setShowConfetti] = useState(false)
   const [isEditMode, setIsEditMode] = useState(true)
   const [isDownloading, setIsDownloading] = useState(false)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [atsAnalysis, setAtsAnalysis] = useState(null)
+  const [showAtsModal, setShowAtsModal] = useState(false)
 
   const sections = [
     {id: "personal", name: "Personal Info", icon: User},
@@ -55,6 +62,8 @@ const ResumeBuilder = () => {
     {id: "education", name: "Education", icon: GraduationCap},
     {id: "project", name: "Project", icon: FolderIcon},
     {id: "skills", name: "Skills", icon: Sparkles},
+    {id: "certifications", name: "Certifications", icon: Award},
+    {id: "languages", name: "Languages", icon: Languages},
   ]
 
   const activeSection = sections[activeSectionIndex]
@@ -62,7 +71,21 @@ const ResumeBuilder = () => {
   useEffect(() => {
     loadExistingResume()
   }, [])
-  
+
+  const scanAts = async () => {
+    setIsAnalyzing(true);
+    try {
+      const response = await api.post('/api/ai/analyze-resume', { resumeData });
+      setAtsAnalysis(response.data.data);
+      setShowAtsModal(true);
+    } catch (error) {
+      console.error("Failed to analyze resume", error);
+      alert("Failed to analyze resume. Please try again.");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }
+
 const changeResumeVisibility = async()=>{
   const newPublic = !resumeData.public
   setResumeData(prev => ({...prev, public: newPublic}))
@@ -140,13 +163,31 @@ const changeResumeVisibility = async()=>{
             // Puppeteer might still be able to load it if it's a public URL.
         }
       });
-      
+
       await Promise.all(imagePromises);
 
-      // Collect styles from all style tags
-      const styles = Array.from(document.querySelectorAll('style'))
-        .map(style => style.innerHTML)
-        .join('\n');
+      // Collect all styles (both internal <style> and external <link>)
+      let styles = '';
+      try {
+        styles = Array.from(document.styleSheets)
+          .map((styleSheet) => {
+            try {
+              return Array.from(styleSheet.cssRules)
+                .map((rule) => rule.cssText)
+                .join('\n');
+            } catch (e) {
+              console.warn("Could not read stylesheet rules (possibly cross-origin):", styleSheet.href, e);
+              return '';
+            }
+          })
+          .join('\n');
+      } catch (e) {
+        console.error("Failed to collect all stylesheets:", e);
+        // Fallback to just style tags if the above fails
+        styles = Array.from(document.querySelectorAll('style'))
+          .map(style => style.innerHTML)
+          .join('\n');
+      }
 
       const response = await api.post('/api/resumes/download-pdf', {
         html: clone.outerHTML,
@@ -162,7 +203,7 @@ const changeResumeVisibility = async()=>{
       link.setAttribute('download', `${resumeData.title || 'resume'}.pdf`);
       document.body.appendChild(link);
       link.click();
-      
+
       // Cleanup
       link.remove();
       window.URL.revokeObjectURL(url);
@@ -176,7 +217,7 @@ const changeResumeVisibility = async()=>{
 
   const saveChanges = async () => {    const formData = new FormData();
     formData.append("resumeId", resumeId);
-    
+
     // Check if a new image is selected
     if (resumeData.personal_info.image && typeof resumeData.personal_info.image !== 'string') {
         formData.append("image", resumeData.personal_info.image);
@@ -188,7 +229,7 @@ const changeResumeVisibility = async()=>{
         // We are sending the image as a file, so we don't need it in the JSON
         delete dataToSend.personal_info.image;
     }
-    
+
     formData.append("resumeData", JSON.stringify(dataToSend));
     formData.append("removeBackground", removeBackground);
 
@@ -224,7 +265,7 @@ const changeResumeVisibility = async()=>{
                   {/* progress bar using activeSectionIndex */}
                   <hr className='absolute top-0 left-0 right-0 border-2 border-gray-200'/>
                   <hr className='absolute top-0 left-0 h-1 bg-linear-to-r from-green-500 to-green-600 border-none transaction-all duration-2000' style={{width: `${activeSectionIndex * 100 / (sections.length -1)}%`}}/>
-                
+
                 {/* Section Navigation */}
                 <div className='flex justify-between items-center mb-6 border-b border-gray-300 py-1'>
                   <div className='flex items-center gap-2'>
@@ -261,14 +302,20 @@ const changeResumeVisibility = async()=>{
                     <ProjectForm data={resumeData.project} onChange={(data)=> setResumeData(prev=>({...prev, project: data}))}/>
                   )}
                   {activeSection.id === 'skills' && (
-                    <SkillsForm data={resumeData.skills} onChange={(data)=> setResumeData(prev=>({...prev, skills: data}))}/>
+                    <SkillsForm data={resumeData.skills} onChange={(data)=> setResumeData(prev => ({...prev, skills: data}))}/>
+                  )}
+                  {activeSection.id === 'certifications' && (
+                    <CertificationForm data={resumeData.certifications} onChange={(data)=> setResumeData(prev => ({...prev, certifications: data}))}/>
+                  )}
+                  {activeSection.id === 'languages' && (
+                    <LanguageForm data={resumeData.languages} onChange={(data)=> setResumeData(prev => ({...prev, languages: data}))}/>
                   )}
                 </div>
                 <div className='flex gap-3 mt-6'>
                   <button onClick={saveChanges} className='bg-linear-to-br from-green-100 to-green-200 ring-green-300 text-green-600 ring hover:ring-green-400 transition-all rounded-md px-6 py-2 text-sm'>
                     Save Changes
                   </button>
-                  {activeSection.id === 'skills' && (
+                  {activeSection.id === 'languages' && (
                     <button
                       onClick={() => {
                         setIsEditMode(false);
@@ -306,6 +353,14 @@ const changeResumeVisibility = async()=>{
                     {resumeData.public ? "Public" : "Private"}
                   </button>
                   <button 
+                    onClick={scanAts} 
+                    disabled={isAnalyzing}
+                    className={`flex items-center gap-2 px-4 py-2 text-xs bg-linear-to-br from-orange-100 to-orange-200 text-orange-600 rounded-lg ring-orange-300 hover:ring transition-colors ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {isAnalyzing ? <Loader2 className='size-4 animate-spin'/> : <Activity className='size-4'/>}
+                    Scan ATS
+                  </button>
+                  <button 
                     onClick={downloadResume} 
                     disabled={isDownloading}
                     className={`flex items-center gap-2 px-6 py-2 text-xs bg-linear-to-br from-green-100 to-green-200 text-green-600 rounded-lg ring-green-300 hover:ring transition-colors ${isDownloading ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -318,6 +373,97 @@ const changeResumeVisibility = async()=>{
           </div>
         </div>
       </div>
+
+      {/* ATS Analysis Modal */}
+      {showAtsModal && atsAnalysis && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm'>
+          <div className='bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col'>
+            <div className='p-6 border-b border-gray-100 flex justify-between items-center bg-linear-to-r from-orange-50 to-white'>
+              <div className='flex items-center gap-3'>
+                <div className='p-2 bg-orange-100 rounded-lg text-orange-600'>
+                  <Activity size={24} />
+                </div>
+                <div>
+                  <h2 className='text-xl font-bold text-gray-900'>ATS Analysis Report</h2>
+                  <p className='text-sm text-gray-500'>Powered by AI Analysis</p>
+                </div>
+              </div>
+              <button onClick={() => setShowAtsModal(false)} className='p-2 hover:bg-gray-100 rounded-full transition-colors'>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className='flex-1 overflow-y-auto p-8 space-y-8'>
+              {/* Score Circle */}
+              <div className='flex flex-col items-center justify-center text-center'>
+                <div className='relative flex items-center justify-center mb-4'>
+                  <svg className='w-32 h-32 transform -rotate-90'>
+                    <circle cx='64' cy='64' r='58' stroke='currentColor' strokeWidth='8' fill='transparent' className='text-gray-100' />
+                    <circle cx='64' cy='64' r='58' stroke='currentColor' strokeWidth='8' fill='transparent' strokeDasharray={364.4} strokeDashoffset={364.4 - (364.4 * atsAnalysis.score) / 100} className={`${atsAnalysis.score >= 70 ? 'text-green-500' : atsAnalysis.score >= 50 ? 'text-orange-500' : 'text-red-500'} transition-all duration-1000 ease-out`} />
+                  </svg>
+                  <span className='absolute text-3xl font-black text-gray-900'>{atsAnalysis.score}%</span>
+                </div>
+                <h3 className='text-lg font-bold text-gray-800'>Overall ATS Score</h3>
+                <p className='text-gray-600 mt-2 max-w-md'>{atsAnalysis.summary}</p>
+              </div>
+
+              <div className='grid md:grid-cols-2 gap-6'>
+                {/* Improvements */}
+                <div className='space-y-4'>
+                  <h4 className='flex items-center gap-2 font-bold text-gray-900 text-sm uppercase tracking-wider'>
+                    <Sparkles size={16} className='text-purple-500' /> Recommended Fixes
+                  </h4>
+                  <ul className='space-y-2'>
+                    {atsAnalysis.improvements.map((tip, i) => (
+                      <li key={i} className='flex items-start gap-2 text-sm text-gray-600'>
+                        <CheckCircle2 size={14} className='text-green-500 mt-0.5 shrink-0' />
+                        {tip}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Keywords */}
+                <div className='space-y-4'>
+                  <h4 className='flex items-center gap-2 font-bold text-gray-900 text-sm uppercase tracking-wider'>
+                    <Info size={16} className='text-blue-500' /> Essential Keywords
+                  </h4>
+                  <div className='flex flex-wrap gap-2'>
+                    {atsAnalysis.keyword_suggestions.map((word, i) => (
+                      <span key={i} className='px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium border border-blue-100 uppercase'>
+                        {word}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Missing Info */}
+              {atsAnalysis.missing_info && atsAnalysis.missing_info.length > 0 && (
+                <div className='p-4 bg-red-50 rounded-xl border border-red-100'>
+                  <h4 className='flex items-center gap-2 font-bold text-red-900 text-sm uppercase tracking-wider mb-3'>
+                    <AlertCircle size={16} /> Attention Required
+                  </h4>
+                  <ul className='space-y-2'>
+                    {atsAnalysis.missing_info.map((info, i) => (
+                      <li key={i} className='flex items-center gap-2 text-sm text-red-700 font-medium'>
+                        <div className='w-1 h-1 bg-red-400 rounded-full' />
+                        {info}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div className='p-6 border-t border-gray-100 bg-gray-50 flex justify-end'>
+              <button onClick={() => setShowAtsModal(false)} className='px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-all'>
+                Close Analysis
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   )

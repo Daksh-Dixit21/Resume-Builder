@@ -124,3 +124,41 @@ experience: [
         return res.status(400).json({message: error.message})
     }
 }
+
+export const analyzeResume = async (req, res) => {
+    try {
+        const { resumeData } = req.body;
+        if (!resumeData) {
+            return res.status(400).json({ message: 'Missing required fields' })
+        }
+
+        const response = await ai.chat.completions.create({
+            model: process.env.OPENAI_MODEL,
+            messages: [
+                {
+                    role: "system",
+                    content: "You are an AI ATS (Applicant Tracking System) Specialist. Your goal is to analyze resume data and provide an ATS score (0-100), a professional summary of the analysis, and actionable improvements. Focus on keyword optimization, content quality, and standard section inclusion."
+                },
+                {
+                    role: "user",
+                    content: `Analyze this resume data and provide a detailed ATS report:
+                    ${JSON.stringify(resumeData)}
+                    
+                    Return a JSON object with:
+                    - score: Number (0-100)
+                    - summary: String (Overall feedback in 2-3 sentences)
+                    - improvements: Array of Strings (At least 3 actionable tips)
+                    - keyword_suggestions: Array of Strings (5-7 relevant keywords based on the profession)
+                    - missing_info: Array of Strings (Sections or details that are missing but important)
+                    `
+                },
+            ],
+            response_format: { type: "json_object" }
+        })
+
+        const analysis = JSON.parse(response.choices[0].message.content);
+        return res.status(200).json({ data: analysis })
+    } catch (error) {
+        return res.status(400).json({ message: error.message })
+    }
+}

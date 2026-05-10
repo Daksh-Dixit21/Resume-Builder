@@ -1,131 +1,267 @@
 import React from 'react'
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { Sparkles, ArrowRight, FileText, Briefcase, GraduationCap, Code, Mail, MapPin, Phone } from 'lucide-react';
+
+const ResumeMockup = () => (
+    <div className="bg-white rounded-lg shadow-xl w-full max-w-[280px] text-left overflow-hidden">
+        {/* Resume Header */}
+        <div className="bg-linear-to-r from-emerald-600 to-teal-600 px-5 py-4">
+            <h3 className="text-sm font-bold text-white">Alex Mitchell</h3>
+            <p className="text-[10px] text-emerald-100 font-medium mt-0.5">Senior Software Engineer</p>
+            <div className="flex gap-3 mt-2 text-[8px] text-emerald-200">
+                <span className="flex items-center gap-0.5"><Mail size={7}/> alex@email.com</span>
+                <span className="flex items-center gap-0.5"><MapPin size={7}/> New York</span>
+            </div>
+        </div>
+        <div className="px-5 py-3 space-y-3">
+            {/* Summary */}
+            <div>
+                <h4 className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Summary</h4>
+                <div className="space-y-1">
+                    <div className="h-1.5 bg-slate-100 rounded-full w-full"></div>
+                    <div className="h-1.5 bg-slate-100 rounded-full w-4/5"></div>
+                </div>
+            </div>
+            {/* Experience */}
+            <div>
+                <h4 className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Experience</h4>
+                <div className="space-y-2">
+                    <div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-[9px] font-semibold text-slate-700">Lead Engineer — Google</span>
+                            <span className="text-[7px] text-slate-400">2022–Now</span>
+                        </div>
+                        <div className="space-y-0.5 mt-1">
+                            <div className="h-1 bg-slate-100 rounded-full w-full"></div>
+                            <div className="h-1 bg-slate-100 rounded-full w-3/4"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-[9px] font-semibold text-slate-700">SDE II — Amazon</span>
+                            <span className="text-[7px] text-slate-400">2019–22</span>
+                        </div>
+                        <div className="space-y-0.5 mt-1">
+                            <div className="h-1 bg-slate-100 rounded-full w-full"></div>
+                            <div className="h-1 bg-slate-100 rounded-full w-2/3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* Skills */}
+            <div>
+                <h4 className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Skills</h4>
+                <div className="space-y-1.5">
+                    {[
+                        { name: 'React & Node.js', width: '92%' },
+                        { name: 'System Design', width: '85%' },
+                        { name: 'Python / ML', width: '78%' },
+                    ].map((skill) => (
+                        <div key={skill.name}>
+                            <div className="flex justify-between">
+                                <span className="text-[8px] text-slate-600">{skill.name}</span>
+                                <span className="text-[7px] text-slate-400">{skill.width}</span>
+                            </div>
+                            <div className="h-1 bg-slate-100 rounded-full overflow-hidden mt-0.5">
+                                <div
+                                    className="h-full bg-linear-to-r from-emerald-400 to-teal-400 rounded-full"
+                                    style={{ width: skill.width }}
+                                ></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            {/* Education */}
+            <div>
+                <h4 className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Education</h4>
+                <div className="flex justify-between items-center">
+                    <span className="text-[9px] font-semibold text-slate-700">M.S. Computer Science</span>
+                    <span className="text-[7px] text-slate-400">MIT</span>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+const BuilderSidebar = () => (
+    <div className="hidden md:flex flex-col w-44 space-y-2.5 shrink-0">
+        {[
+            { icon: <FileText size={12} />, label: 'Personal Info', active: false },
+            { icon: <Briefcase size={12} />, label: 'Experience', active: true },
+            { icon: <Code size={12} />, label: 'Skills', active: false },
+            { icon: <GraduationCap size={12} />, label: 'Education', active: false },
+        ].map((item) => (
+            <div key={item.label}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-medium transition-all ${
+                    item.active
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                        : 'text-white/40 hover:text-white/60 border border-transparent'
+                }`}
+            >
+                {item.icon}
+                <span>{item.label}</span>
+            </div>
+        ))}
+        {/* Fake form fields */}
+        <div className="mt-3 pt-3 border-t border-white/10 space-y-2">
+            <div className="h-2 bg-white/10 rounded w-16"></div>
+            <div className="h-6 bg-white/5 border border-white/10 rounded-md"></div>
+            <div className="h-2 bg-white/10 rounded w-20 mt-2"></div>
+            <div className="h-6 bg-white/5 border border-white/10 rounded-md"></div>
+            <div className="h-2 bg-white/10 rounded w-14 mt-2"></div>
+            <div className="h-14 bg-white/5 border border-white/10 rounded-md"></div>
+        </div>
+    </div>
+);
 
 const Hero = () => {
-
-    const {user} = useSelector(state=> state.auth)
-
+    const { user } = useSelector(state => state.auth);
     const [menuOpen, setMenuOpen] = React.useState(false);
-
-    const logos = [
-        'https://www.vectorlogo.zone/logos/google/google-ar21.svg',
-        'https://www.vectorlogo.zone/logos/amazon/amazon-ar21.svg',
-        'https://www.vectorlogo.zone/logos/microsoft/microsoft-ar21.svg',
-        'https://www.vectorlogo.zone/logos/netflix/netflix-ar21.svg',
-        'https://www.vectorlogo.zone/logos/facebook/facebook-ar21.svg',
-    ]
 
     return (
         <>
-            <div className="min-h-screen pb-20">
+            <div className="relative min-h-screen bg-slate-950 overflow-hidden">
+                {/* Background effects */}
+                <div className="absolute inset-0 hero-grid"></div>
+                <div className="absolute top-10 left-1/4 size-80 bg-emerald-500/15 rounded-full blur-[120px] animate-float"></div>
+                <div className="absolute bottom-40 right-1/5 size-72 bg-teal-500/10 rounded-full blur-[100px] animate-float-delayed"></div>
+                <div className="absolute top-1/3 right-1/3 size-96 bg-indigo-500/8 rounded-full blur-[140px]"></div>
+
                 {/* Navbar */}
-                <nav className="z-50 flex items-center justify-between w-full py-4 px-6 md:px-16 lg:px-24 xl:px-40 text-sm">
-                    <a href="https://prebuiltui.com">
-                        <img src="/logo.svg" alt="logo" className='h-11 w-auto'/>
-                    </a>
+                <nav className="relative z-50 flex items-center justify-between w-full py-4 px-6 md:px-16 lg:px-24 xl:px-40">
+                    <Link to="/" className="flex items-center gap-2.5">
+                        <div className="size-9 rounded-xl bg-linear-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                            <FileText size={18} className="text-white" />
+                        </div>
+                        <span className="text-xl font-bold tracking-tight text-white">ResumeAI</span>
+                    </Link>
 
-                    <div className="hidden md:flex items-center gap-8 transition duration-500 text-slate-800">
-                        <a href="#" className="hover:text-green-600 transition">Home</a>
-                        <a href="#features" className="hover:text-green-600 transition">Features</a>
-                        <a href="#testimonials" className="hover:text-green-600 transition">Testimonials</a>
-                        <a href="#cta" className="hover:text-green-600 transition">Contact</a>
+                    <div className="hidden md:flex items-center gap-8 text-sm text-white/60">
+                        <a href="#" className="hover:text-white transition font-medium">Home</a>
+                        <a href="#features" className="hover:text-white transition font-medium">Features</a>
+                        <a href="#testimonials" className="hover:text-white transition font-medium">Testimonials</a>
+                        <a href="#cta" className="hover:text-white transition font-medium">Contact</a>
                     </div>
 
-                    <div className="flex gap-2">
-                        <Link to='/app?state=register' className="hidden md:block px-6 py-2 bg-green-500 hover:bg-green-700 active:scale-95 transition-all rounded-full text-white" hidden={user}>
-                            Get started
-                        </Link>
-                        <Link to='/app?state=login' className="hidden md:block px-6 py-2 border active:scale-95 hover:bg-slate-50 transition-all rounded-full text-slate-700 hover:text-slate-900" hidden={user} >
-                            Login
-                        </Link>
-                        <Link to='/app' className='hidden md:block px-8 py-2 bg-green-500 hover:bg-green-700 active:scale-95 transition-all rounded-full text-white' hidden={!user}>
-                            Dashboard
-                        </Link>
+                    <div className="hidden md:flex gap-3">
+                        {!user ? (
+                            <>
+                                <Link to='/app?state=login' className="px-6 py-2 text-sm border border-white/20 text-white/80 hover:text-white hover:border-white/40 rounded-full transition-all active:scale-95">
+                                    Login
+                                </Link>
+                                <Link to='/app?state=register' className="px-6 py-2 text-sm bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-full transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
+                                    Get Started
+                                </Link>
+                            </>
+                        ) : (
+                            <Link to='/app' className="px-8 py-2 text-sm bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-full transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
+                                Dashboard
+                            </Link>
+                        )}
                     </div>
 
-                    <button onClick={() => setMenuOpen(true)} className="md:hidden active:scale-90 transition" >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2" className="lucide lucide-menu" >
+                    <button onClick={() => setMenuOpen(true)} className="md:hidden text-white active:scale-90 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M4 5h16M4 12h16M4 19h16" />
                         </svg>
                     </button>
                 </nav>
 
                 {/* Mobile Menu */}
-                <div className={`fixed inset-0 z-100 bg-black/40 text-black backdrop-blur flex flex-col items-center justify-center text-lg gap-8 md:hidden transition-transform duration-300 ${menuOpen ? "translate-x-0" : "-translate-x-full"}`} >
-                    <a href="#" className="text-white">Home</a>
-                    <a href="#features" className="text-white">Features</a>
-                    <a href="#testimonials" className="text-white">Testimonials</a>
-                    <a href="#contact" className="text-white">Contact</a>
-                    <button onClick={() => setMenuOpen(false)} className="active:ring-3 active:ring-white aspect-square size-10 p-1 items-center justify-center bg-green-600 hover:bg-green-700 transition text-white rounded-md flex" >
-                        X
-                    </button>
+                <div className={`fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-center text-lg gap-6 md:hidden transition-all duration-300 ${menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
+                    <a href="#" onClick={() => setMenuOpen(false)} className="text-white/80 hover:text-white transition">Home</a>
+                    <a href="#features" onClick={() => setMenuOpen(false)} className="text-white/80 hover:text-white transition">Features</a>
+                    <a href="#testimonials" onClick={() => setMenuOpen(false)} className="text-white/80 hover:text-white transition">Testimonials</a>
+                    <a href="#cta" onClick={() => setMenuOpen(false)} className="text-white/80 hover:text-white transition">Contact</a>
+                    <div className="flex gap-3 mt-4">
+                        {!user ? (
+                            <>
+                                <Link to='/app?state=login' onClick={() => setMenuOpen(false)} className="px-6 py-2 text-sm border border-white/20 text-white rounded-full">Login</Link>
+                                <Link to='/app?state=register' onClick={() => setMenuOpen(false)} className="px-6 py-2 text-sm bg-emerald-500 text-white rounded-full">Get Started</Link>
+                            </>
+                        ) : (
+                            <Link to='/app' onClick={() => setMenuOpen(false)} className="px-8 py-2 text-sm bg-emerald-500 text-white rounded-full">Dashboard</Link>
+                        )}
+                    </div>
+                    <button onClick={() => setMenuOpen(false)} className="mt-4 size-10 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition">✕</button>
                 </div>
 
-                {/* Hero Section */}
-                <div className="relative flex flex-col items-center justify-center text-sm px-4 md:px-16 lg:px-24 xl:px-40 text-black">
-                    <div className="absolute top-28 xl:top-10 -z-10 left-1/4 size-72 sm:size-96 xl:size-120 2xl:size-132 bg-green-300 blur-[100px] opacity-30"></div>
-
-                    {/* Avatars + Stars */}
-                    <div className="flex items-center mt-24">
-                        <div className="flex -space-x-3 pr-3">
-                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200" alt="user3" className="size-8 object-cover rounded-full border-2 border-white hover:-translate-y-0.5 transition z-1" />
-                            <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200" alt="user1" className="size-8 object-cover rounded-full border-2 border-white hover:-translate-y-0.5 transition z-2" />
-                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200" alt="user2" className="size-8 object-cover rounded-full border-2 border-white hover:-translate-y-0.5 transition z-3" />
-                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200" alt="user3" className="size-8 object-cover rounded-full border-2 border-white hover:-translate-y-0.5 transition z-4" />
-                            <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="user5" className="size-8 rounded-full border-2 border-white hover:-translate-y-0.5 transition z-5" />
-                        </div>
-
-                        <div>
-                            <div className="flex ">
-                                {Array(5).fill(0).map((_, i) => (
-                                    <svg key={i} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-star text-transparent fill-green-600" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path></svg>
-                                ))}
-                            </div>
-                            <p className="text-sm text-gray-700">
-                                Loved by many users
-                            </p>
-                        </div>
+                {/* Hero Content */}
+                <div className="relative flex flex-col items-center text-center px-4 md:px-16 lg:px-24 xl:px-40 pt-12 md:pt-20">
+                    {/* Badge */}
+                    <div className="animate-fade-in-up flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20 text-sm font-medium mb-8">
+                        <Sparkles size={14} className="fill-emerald-400" />
+                        <span>AI-Powered Resume Builder</span>
                     </div>
 
-                    {/* Headline + CTA */}
-                    <h1 className="text-5xl md:text-6xl font-semibold max-w-5xl text-center mt-4 md:leading-[70px]">
-                        Craft a job-winning resume with our <span className=" bg-linear-to-r from-green-700 to-green-600 bg-clip-text text-transparent text-nowrap">AI-powered </span> builder.
+                    {/* Headline */}
+                    <h1 className="animate-fade-in-up-delay-1 text-4xl sm:text-5xl md:text-7xl font-bold max-w-5xl leading-[1.1] tracking-tight text-white">
+                        Build a Job-Winning Resume{' '}
+                        <span className="bg-linear-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">in Minutes</span>
                     </h1>
 
-                    <p className="max-w-md text-center text-base my-7">Create, edit and download professional resumes with AI-powered assistance.</p>
+                    {/* Subtitle */}
+                    <p className="animate-fade-in-up-delay-2 max-w-2xl text-base sm:text-lg md:text-xl text-white/50 mt-6 mb-8 leading-relaxed">
+                        Go beyond basic templates. Use AI to craft perfect content, beat ATS filters, and land your dream job faster than ever.
+                    </p>
+
+                    {/* Feature Pills */}
+                    <div className="animate-fade-in-up-delay-2 flex flex-wrap justify-center gap-2.5 mb-10">
+                        {['AI Content Generation', 'Smart ATS Scoring', 'Premium Templates', 'Instant PDF Export'].map((feature) => (
+                            <div key={feature} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-white/60 backdrop-blur-sm">
+                                <div className="size-1.5 rounded-full bg-emerald-400"></div>
+                                <span className="text-xs font-medium">{feature}</span>
+                            </div>
+                        ))}
+                    </div>
 
                     {/* CTA Buttons */}
-                    <div className="flex items-center gap-4 ">
-                        <Link to='/app' className="bg-green-500 hover:bg-green-600 text-white rounded-full px-9 h-12 m-1 ring-offset-2 ring-1 ring-green-400 flex items-center transition-colors">
-                            Get started
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-right ml-1 size-4" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                    <div className="animate-fade-in-up-delay-3 flex flex-col sm:flex-row items-center gap-4">
+                        <Link to='/app' className="w-full sm:w-auto bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-full px-10 h-14 text-base font-bold shadow-lg shadow-emerald-500/25 flex items-center justify-center transition-all active:scale-95 gap-2">
+                            Create My Resume
+                            <ArrowRight size={18} />
                         </Link>
-                        <button className="flex items-center gap-2 border border-slate-400 hover:bg-green-50 transition rounded-full px-7 h-12 text-slate-700">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-video size-5" aria-hidden="true"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect></svg>
-                            <span>Try demo</span>
-                        </button>
+                        <a href="#features" className="w-full sm:w-auto flex items-center justify-center gap-2 border border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 backdrop-blur-sm transition-all rounded-full px-10 h-14 text-base font-bold text-white/80 hover:text-white active:scale-95">
+                            How it works
+                        </a>
                     </div>
 
-                    <p className="py-6 text-slate-600 mt-14">Get Hired by leading brand, such as</p>
-
-                    <div className="flex flex-wrap justify-between max-sm:justify-center gap-6 max-w-3xl w-full mx-auto py-4" id="logo-container">
-                        {logos.map((logo, index) => <img key={index} src={logo} alt="logo" className="h-12 w-auto max-w-xs" />)}
+                    {/* Preview Mockup */}
+                    <div className="animate-fade-in-up-delay-4 mt-16 md:mt-20 w-full max-w-4xl preview-tilt">
+                        <div className="rounded-xl overflow-hidden border border-white/10 shadow-2xl shadow-emerald-500/5 animate-pulse-glow">
+                            {/* Browser Chrome */}
+                            <div className="bg-white/5 backdrop-blur-sm px-4 py-2.5 flex items-center border-b border-white/10">
+                                <div className="flex gap-1.5">
+                                    <div className="size-3 rounded-full bg-red-400/70"></div>
+                                    <div className="size-3 rounded-full bg-yellow-400/70"></div>
+                                    <div className="size-3 rounded-full bg-green-400/70"></div>
+                                </div>
+                                <div className="flex-1 text-center">
+                                    <span className="text-xs text-white/30 font-mono">resumeai.app/builder</span>
+                                </div>
+                            </div>
+                            {/* Builder Interface */}
+                            <div className="bg-slate-900/80 backdrop-blur-sm p-4 md:p-6 flex gap-5">
+                                <BuilderSidebar />
+                                <div className="flex-1 flex justify-center">
+                                    <ResumeMockup />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <style>
-                {`
-                    @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
-                    * {
-                        font-family: 'Poppins', sans-serif;
-                    }
-                `}
-            </style>
+                {/* Bottom fade to white */}
+                <div className="absolute bottom-0 left-0 right-0 h-40 bg-linear-to-t from-white to-transparent"></div>
+            </div>
+
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+            `}</style>
         </>
     );
 }
-
 
 export default Hero

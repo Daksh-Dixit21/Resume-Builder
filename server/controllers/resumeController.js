@@ -103,8 +103,15 @@ export const downloadPdf = async (req, res) => {
             ]
         });
         const page = await browser.newPage();
+        
+        // Set viewport to standard A4 resolution at 96 DPI
+        await page.setViewport({
+            width: 794,
+            height: 1123,
+            deviceScaleFactor: 1,
+        });
 
-        // Construct the full HTML document
+        // Construct the full HTML document with a robust font stack
         const fullHtml = `
             <!DOCTYPE html>
             <html lang="en">
@@ -114,22 +121,47 @@ export const downloadPdf = async (req, res) => {
                 <title>Resume</title>
                 <style>
                     ${css || ''}
-                    @page { size: A4; margin: 0; }
-                    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    @page { 
+                        size: A4; 
+                        margin: 0; 
+                    }
+                    body { 
+                        -webkit-print-color-adjust: exact; 
+                        print-color-adjust: exact; 
+                        margin: 0;
+                        padding: 0;
+                        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+                    }
+                    #resume-preview {
+                        width: 100% !important;
+                        height: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        border: none !important;
+                    }
                 </style>
             </head>
             <body>
-                ${html}
+                <div id="pdf-content">
+                    ${html}
+                </div>
             </body>
             </html>
         `;
 
-        await page.setContent(fullHtml, { waitUntil: 'networkidle0', timeout: 60000 });
+        await page.setContent(fullHtml, { 
+            waitUntil: ['networkidle0', 'load', 'domcontentloaded'], 
+            timeout: 60000 
+        });
+        
+        // Final layout verification wait
+        await page.evaluateHandle('document.fonts.ready');
         await page.emulateMediaType('print');
 
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
+            preferCSSPageSize: true,
             margin: {
                 top: '0px',
                 right: '0px',
