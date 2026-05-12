@@ -20,6 +20,42 @@ const Dashboard = () => {
   const [editResumeId, setEditResumeId] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
+  // Email Tool State
+  const [showEmailTool, setShowEmailTool] = useState(false)
+  const [emailContent, setEmailContent] = useState('')
+  const [refinePrompt, setRefinePrompt] = useState('')
+  const [isRefining, setIsRefining] = useState(false)
+
+  const emailTemplates = [
+    {
+      title: 'Onboarding Email',
+      content: `Subject: Welcome to the Team! 🚀\n\nHi [Candidate Name],\n\nWelcome aboard! We are thrilled to have you join us as our new [Job Title]. Your journey with [Company Name] starts on [Start Date], and we couldn't be more excited.\n\nTo get you started, here are a few things to keep in mind:\n1. Your first day schedule...\n2. Required documents...\n3. Office/Remote access details...\n\nWe'll be here to support you every step of the way. See you soon!\n\nBest regards,\n[Your Name]`
+    },
+    {
+      title: 'Interview Details',
+      content: `Subject: Interview Invitation: [Job Title] position at [Company Name]\n\nHi [Candidate Name],\n\nThank you for your interest in the [Job Title] role at [Company Name]. We were impressed with your background and would like to invite you for an interview.\n\nDetails:\n- Date: [Date]\n- Time: [Time]\n- Location/Link: [Link]\n- Interviewers: [Names]\n\nPlease confirm your availability for this slot. We look forward to speaking with you!\n\nBest,\n[Your Name]`
+    },
+    {
+      title: 'Job Offer',
+      content: `Subject: Job Offer: [Job Title] at [Company Name]\n\nDear [Candidate Name],\n\nWe are delighted to offer you the position of [Job Title] at [Company Name]! We believe your skills and experience will be a great asset to our team.\n\nAttached you will find the formal offer letter with details on:\n- Compensation and benefits\n- Start date and reporting structure\n- Next steps for acceptance\n\nPlease let us know your decision by [Date]. We are excited about the possibility of you joining us!\n\nWarmly,\n[Your Name]`
+    }
+  ]
+
+  const refineEmail = async () => {
+    if (!emailContent) return toast.error('Please select a template or enter content')
+    setIsRefining(true)
+    try {
+      const { data } = await api.post('/api/ai/refine-email', { content: emailContent, prompt: refinePrompt }, { headers: { Authorization: token } })
+      setEmailContent(data.data)
+      setRefinePrompt('')
+      toast.success('Email refined!')
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error.message)
+    } finally {
+      setIsRefining(false)
+    }
+  }
+
   const navigate = useNavigate()
 
   const statCards = analytics ? [
@@ -256,45 +292,47 @@ const Dashboard = () => {
                 </div>
               </section>
 
-              <section className='bg-white border border-slate-200 rounded-2xl p-5 h-fit'>
-                <div className='flex items-center justify-between mb-4'>
-                  <h2 className='font-semibold text-slate-950'>Quick Email Tool</h2>
-                  <button onClick={() => setShowEmailTool(true)} className='text-sm text-blue-600 hover:text-blue-700 font-medium'>Open Tool</button>
-                </div>
-                <div className='grid grid-cols-2 gap-3'>
-                  {emailTemplates.slice(0, 2).map((tmp, i) => (
-                    <button key={i} onClick={() => { setEmailContent(tmp.content); setShowEmailTool(true) }} className='text-left p-3 rounded-xl border border-slate-100 hover:border-blue-100 hover:bg-blue-50/30 transition-all'>
-                      <p className='text-xs font-semibold text-slate-900'>{tmp.title}</p>
-                      <p className='text-[10px] text-slate-500 line-clamp-1 mt-1'>{tmp.content.split('\n')[2]}</p>
-                    </button>
-                  ))}
-                </div>
-              </section>
+              <div className='flex flex-col gap-5'>
+                <section className='bg-white border border-slate-200 rounded-2xl p-5'>
+                  <div className='flex items-center justify-between mb-4'>
+                    <h2 className='font-semibold text-slate-950'>Quick Email Tool</h2>
+                    <button onClick={() => setShowEmailTool(true)} className='text-sm text-blue-600 hover:text-blue-700 font-medium'>Open Tool</button>
+                  </div>
+                  <div className='grid grid-cols-2 gap-3'>
+                    {emailTemplates.slice(0, 2).map((tmp, i) => (
+                      <button key={i} onClick={() => { setEmailContent(tmp.content); setShowEmailTool(true) }} className='text-left p-3 rounded-xl border border-slate-100 hover:border-blue-100 hover:bg-blue-50/30 transition-all'>
+                        <p className='text-xs font-semibold text-slate-900'>{tmp.title}</p>
+                        <p className='text-[10px] text-slate-500 line-clamp-1 mt-1'>{tmp.content.split('\n')[2]}</p>
+                      </button>
+                    ))}
+                  </div>
+                </section>
 
-              <section className='bg-white border border-slate-200 rounded-2xl p-5 h-fit'>
-                <div className='flex items-center justify-between mb-4'>
-                  <h2 className='font-semibold text-slate-950'>Cover letters</h2>
-                  <button onClick={() => navigate('/app/cover-letter/new')} className='text-sm text-emerald-600 hover:text-emerald-700 font-medium'>Generate</button>
-                </div>
-                <div className='space-y-3'>
-                  {coverLetters.slice(0, 4).map((cl) => (
-                    <article key={cl._id} className='group rounded-xl border border-slate-200 p-4 hover:shadow-sm transition-all'>
-                      <div className='flex items-start justify-between gap-3'>
-                        <div>
-                          <h3 className='text-sm font-semibold text-slate-900 line-clamp-1'>{cl.title}</h3>
-                          {(cl.jobTitle || cl.company) && <p className='text-xs text-emerald-600 mt-1'>{[cl.jobTitle, cl.company].filter(Boolean).join(' at ')}</p>}
+                <section className='bg-white border border-slate-200 rounded-2xl p-5'>
+                  <div className='flex items-center justify-between mb-4'>
+                    <h2 className='font-semibold text-slate-950'>Cover letters</h2>
+                    <button onClick={() => navigate('/app/cover-letter/new')} className='text-sm text-emerald-600 hover:text-emerald-700 font-medium'>Generate</button>
+                  </div>
+                  <div className='space-y-3'>
+                    {coverLetters.slice(0, 4).map((cl) => (
+                      <article key={cl._id} className='group rounded-xl border border-slate-200 p-4 hover:shadow-sm transition-all'>
+                        <div className='flex items-start justify-between gap-3'>
+                          <div>
+                            <h3 className='text-sm font-semibold text-slate-900 line-clamp-1'>{cl.title}</h3>
+                            {(cl.jobTitle || cl.company) && <p className='text-xs text-emerald-600 mt-1'>{[cl.jobTitle, cl.company].filter(Boolean).join(' at ')}</p>}
+                          </div>
+                          <div className='flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity'>
+                            <button onClick={() => duplicateCoverLetter(cl._id)} className='p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100'><Copy className='size-3.5' /></button>
+                            <button onClick={() => deleteCoverLetter(cl._id)} className='p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50'><Trash2 className='size-3.5' /></button>
+                          </div>
                         </div>
-                        <div className='flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity'>
-                          <button onClick={() => duplicateCoverLetter(cl._id)} className='p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100'><Copy className='size-3.5' /></button>
-                          <button onClick={() => deleteCoverLetter(cl._id)} className='p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50'><Trash2 className='size-3.5' /></button>
-                        </div>
-                      </div>
-                      <p className='text-xs text-slate-500 line-clamp-2 mt-2'>{cl.content}</p>
-                    </article>
-                  ))}
-                  {coverLetters.length === 0 && <p className='text-sm text-slate-400'>No cover letters yet.</p>}
-                </div>
-              </section>
+                        <p className='text-xs text-slate-500 line-clamp-2 mt-2'>{cl.content}</p>
+                      </article>
+                    ))}
+                    {coverLetters.length === 0 && <p className='text-sm text-slate-400'>No cover letters yet.</p>}
+                  </div>
+                </section>
+              </div>
             </div>
           </main>
 
@@ -370,13 +408,21 @@ const Dashboard = () => {
             </div>
           </form>
         )}
-      </div>
-    </div>
-  )
-}
 
-export default Dashboard
-      <button key={i} onClick={() => setEmailContent(tmp.content)} className={`w-full text-left p-2.5 rounded-lg text-xs font-medium transition-all ${emailContent === tmp.content ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-blue-300'}`}>
+        {showEmailTool && (
+          <div onClick={() => setShowEmailTool(false)} className='fixed inset-0 bg-black/70 backdrop-blur bg-opacity-50 z-[100] flex items-center justify-center p-4'>
+            <div onClick={e => e.stopPropagation()} className='relative bg-white border shadow-2xl rounded-2xl w-full max-w-2xl overflow-hidden'>
+              <div className='p-6 border-b border-slate-100 flex items-center justify-between'>
+                <h2 className='text-xl font-bold text-slate-900'>Email Generator & Refiner</h2>
+                <button onClick={() => setShowEmailTool(false)} className='p-2 hover:bg-slate-100 rounded-full transition-colors'><XIcon className='size-5 text-slate-500' /></button>
+              </div>
+
+              <div className='grid md:grid-cols-[200px_1fr] h-[500px]'>
+                <div className='bg-slate-50 p-4 border-r border-slate-100 overflow-y-auto'>
+                  <p className='text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3'>Templates</p>
+                  <div className='space-y-2'>
+                    {emailTemplates.map((tmp, i) => (
+                      <button key={i} onClick={() => setEmailContent(tmp.content)} className={`w-full text-left p-2.5 rounded-lg text-xs font-medium transition-all ${emailContent === tmp.content ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-blue-300'}`}>
                         {tmp.title}
                       </button>
                     ))}
