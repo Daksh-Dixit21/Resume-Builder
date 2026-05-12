@@ -47,12 +47,12 @@ const ModernTemplate = ({ data, accentColor }) => {
 	return (
 		<div className="w-full bg-white text-gray-800">
 			{/* Header */}
-			<header className="pb-5 pt-6 pl-6 pr-6 text-white" style={{ backgroundColor: accentColor }} aria-label="Personal Information">
+			<header className="pb-4 pt-5 px-6 text-white" style={{ backgroundColor: accentColor }} aria-label="Personal Information">
 				<h1 className="text-3xl font-light mb-1">
 					{data.personal_info?.full_name || "Your Name"}
 				</h1>
 				{data.personal_info?.profession && (
-					<p className="text-sm font-medium opacity-90 mb-4 uppercase tracking-wider">{data.personal_info.profession}</p>
+					<p className="text-sm font-medium opacity-90 mb-3 uppercase tracking-wider">{data.personal_info.profession}</p>
 				)}
 
 				<ul className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] list-none p-0 m-0" aria-label="Contact Details">
@@ -138,11 +138,11 @@ const ModernTemplate = ({ data, accentColor }) => {
 				</ul>
 			</header>
 
-			<div className="p-6">
+			<div className="p-5">
 				{/* Professional Summary */}
 				{data.professional_summary && (
-					<section className="mb-6" aria-labelledby="summary-heading">
-						<h2 id="summary-heading" className="text-xl font-semibold mb-3 pb-2 border-b-2 text-gray-800" style={{ borderColor: accentColor }}>
+					<section className="mb-4" aria-labelledby="summary-heading">
+						<h2 id="summary-heading" className="text-xl font-semibold mb-2 pb-1.5 border-b-2 text-gray-800" style={{ borderColor: accentColor }}>
 							Professional Summary
 						</h2>
 						<p className="text-gray-700 text-sm text-justify whitespace-pre-wrap">{data.professional_summary}</p>
@@ -151,8 +151,8 @@ const ModernTemplate = ({ data, accentColor }) => {
 
 				{/* Experience */}
 				{data.experience && data.experience.length > 0 && (
-					<section className="mb-6" aria-labelledby="experience-heading">
-						<h2 id="experience-heading" className="text-xl font-semibold mb-3 pb-2 border-b-2 text-gray-800" style={{ borderColor: accentColor }}>
+					<section className="mb-4" aria-labelledby="experience-heading">
+						<h2 id="experience-heading" className="text-xl font-semibold mb-2 pb-1.5 border-b-2 text-gray-800" style={{ borderColor: accentColor }}>
 							Professional Experience
 						</h2>
 

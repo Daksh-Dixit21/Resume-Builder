@@ -6,7 +6,7 @@ import MinimalImageTemplate from './templates/MinimalImageTemplate'
 import ProfessionalTemplate from './templates/ProfessionalTemplate'
 import PageBreakIndicator from './PageBreakIndicator'
 
-const ResumePreview = ({data, template, accentColor, classes = ""}) => {
+const ResumePreview = ({data, template, accentColor, classes = "", showPageWarning = false, fontFamily = "Outfit"}) => {
  
 
     const renderTemplate = () => {
@@ -25,8 +25,8 @@ const ResumePreview = ({data, template, accentColor, classes = ""}) => {
     }
  return (
     <div className='w-full bg-gray-100'>
-        <div id='resume-preview' className={"border border-gray-200 print:shadow-none print:border-none " + classes}>
-            <PageBreakIndicator>
+        <div id='resume-preview' className={"border border-gray-200 print:shadow-none print:border-none " + classes} style={{ fontFamily: `"${fontFamily}", sans-serif` }}>
+            <PageBreakIndicator enabled={showPageWarning}>
                 {renderTemplate()}
             </PageBreakIndicator>
         </div>
@@ -46,9 +46,10 @@ const ResumePreview = ({data, template, accentColor, classes = ""}) => {
             body * {
             visibility: hidden;
             }
-            #resume-preview, #resume-preview * {
+#resume-preview, #resume-preview * {
                 visibility: visible;
             }
+
                 #resume-preview{
                 position: absolute;
                 left: 0;

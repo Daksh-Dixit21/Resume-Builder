@@ -4,8 +4,11 @@ const ResumeSchema = new mongoose.Schema({
 userId: {type: mongoose.Schema.Types.ObjectId, ref: "User"},
 title: {type: String, default: 'Untitled Resume'},
 public: { type: Boolean, default: false },
+views: { type: Number, default: 0 },
+viewHistory: [{ date: { type: Date, default: Date.now } }],
 template: { type: String, default: "classic"},
 accent_color: { type: String, default: "#3882F6" },
+font_family: { type: String, default: "Outfit" },
 professional_summary: { type: String, default: '' },
 skills: [{ type: String}],
 personal_info: {

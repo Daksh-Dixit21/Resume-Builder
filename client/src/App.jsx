@@ -6,6 +6,9 @@ import Home from './pages/Home'
 import Layout from './pages/Layout'
 import Login from './pages/Login'
 import Preview from './pages/Preview'
+import Portfolio from './pages/Portfolio'
+import PortfolioSettings from './pages/PortfolioSettings'
+import CoverLetterGenerator from './pages/CoverLetterGenerator'
 import { useDispatch } from 'react-redux'
 import api from './configs/api'
 import {login, setLoading}from './app/features/authSlice'
@@ -45,8 +48,11 @@ const App = () => {
       <Route path='app' element={<Layout />}>
         <Route index element ={<Dashboard />}/>
         <Route path='builder/:resumeId' element ={<ResumeBuilder />}/>
+        <Route path='cover-letter/new' element={<CoverLetterGenerator />} />
+        <Route path='portfolio' element={<PortfolioSettings />} />
       </Route>
       <Route path='view/:resumeId' element ={<Preview />}/>
+      <Route path='portfolio/:username' element={<Portfolio />} />
     </Routes>
     </>
   )

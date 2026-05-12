@@ -28,6 +28,11 @@ const TemplateSelector = ({selectedTemplate, onChange}) => {
         id: "professional",
         name: "Professional",
         preview: "Bold, executive-style template with a strong hierarchical structure"
+    },
+    {
+        id: "ats",
+        name: "ATS Compact",
+        preview: "A recruiter-first version of the classic layout with dense sections"
     }
   ]
   return (

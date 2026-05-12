@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 
-const PageBreakIndicator = ({ children }) => {
+const PageBreakIndicator = ({ children, enabled = false }) => {
     const containerRef = useRef(null);
     const [showWarning, setShowWarning] = useState(false);
     const [isOverflowing, setIsOverflowing] = useState(false);
 
     useEffect(() => {
         const checkHeight = () => {
-            if (containerRef.current) {
+            if (enabled && containerRef.current) {
                 const height = containerRef.current.offsetHeight;
                 // Letter size is 11 inches = 1056px at 96 DPI
                 const pageHeight = 1056;
@@ -20,6 +20,12 @@ const PageBreakIndicator = ({ children }) => {
         };
 
         // Check height after component mounts and when window resizes
+        if (!enabled) {
+            setShowWarning(false);
+            setIsOverflowing(false);
+            return;
+        }
+
         checkHeight();
         window.addEventListener('resize', checkHeight);
 
@@ -30,7 +36,7 @@ const PageBreakIndicator = ({ children }) => {
             window.removeEventListener('resize', checkHeight);
             clearTimeout(timeoutId);
         };
-    }, [children]);
+    }, [children, enabled]);
 
     return (
         <div className="relative">
@@ -56,7 +62,7 @@ const PageBreakIndicator = ({ children }) => {
             )}
 
             {/* Visual page break line - hidden in print */}
-            <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gray-300 opacity-50 print:hidden"></div>
+            {enabled && showWarning && <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gray-300 opacity-50 print:hidden"></div>}
         </div>
     );
 };
