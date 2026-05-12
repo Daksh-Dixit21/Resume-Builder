@@ -175,6 +175,7 @@ export const updateResume = async (req, res) => {
 }
 
 export const downloadPdf = async (req, res) => {
+    let browser;
     try {
         const { html, css } = req.body;
 
@@ -182,7 +183,7 @@ export const downloadPdf = async (req, res) => {
             return res.status(400).json({ message: "HTML content is required" });
         }
 
-        const browser = await puppeteer.launch({
+        browser = await puppeteer.launch({
             headless: 'new',
             args: [
                 '--no-sandbox',
@@ -192,6 +193,7 @@ export const downloadPdf = async (req, res) => {
             ]
         });
         const page = await browser.newPage();
+        page.setDefaultNavigationTimeout(120000);
         
         // Set viewport to standard A4 resolution at 96 DPI
         await page.setViewport({
@@ -242,8 +244,8 @@ export const downloadPdf = async (req, res) => {
         `;
 
         await page.setContent(fullHtml, { 
-            waitUntil: ['networkidle0', 'load', 'domcontentloaded'], 
-            timeout: 60000 
+            waitUntil: 'domcontentloaded', 
+            timeout: 120000 
         });
         
         // Ensure all fonts are loaded
@@ -252,7 +254,7 @@ export const downloadPdf = async (req, res) => {
         });
         
         // Small delay to ensure layout engine catches up with fonts
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await page.waitForTimeout(1000);
         
         await page.emulateMediaType('print');
 
@@ -268,8 +270,6 @@ export const downloadPdf = async (req, res) => {
             }
         });
 
-        await browser.close();
-
         res.set({
             'Content-Type': 'application/pdf',
             'Content-Length': pdfBuffer.length,
@@ -281,5 +281,9 @@ export const downloadPdf = async (req, res) => {
     } catch (error) {
         console.error("PDF Generation Error:", error);
         return res.status(500).json({ message: "Failed to generate PDF" });
+    } finally {
+        if (browser) {
+            await browser.close().catch(() => {});
+        }
     }
 };
