@@ -31,8 +31,8 @@ const TemplateSelector = ({selectedTemplate, onChange}) => {
     },
     {
         id: "ats",
-        name: "ATS Compact",
-        preview: "A recruiter-first version of the classic layout with dense sections"
+        name: "Executive",
+        preview: "A high-end, Ivy League-style layout with clean lines and refined spacing"
     }
   ]
   return (

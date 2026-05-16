@@ -19,8 +19,8 @@ const Navbar = () => {
     <div className='shadow bg-white'>
         <nav className='flex items-center justify-between max-w-7xl mx-auto px-4 py-3.5 text-slate-800 transition-all'>
             <Link to='/' className='flex items-center gap-2'>
-                <div className="size-8 rounded-lg bg-linear-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
-                    <FileText size={16} className="text-white" />
+                <div className="size-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center font-black text-xl text-white">
+                    R
                 </div>
                 <span className="text-lg font-bold tracking-tight text-slate-800">ResumeAI</span>
             </Link>

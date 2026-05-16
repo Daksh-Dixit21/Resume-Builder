@@ -11,8 +11,8 @@ const Footer = () => {
                     {/* Brand */}
                     <div className="flex flex-col items-center md:items-start">
                         <div className="flex items-center gap-2.5 mb-3">
-                            <div className="size-9 rounded-xl bg-linear-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
-                                <FileText size={18} className="text-white" />
+                            <div className="size-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center font-black text-xl text-white">
+                                R
                             </div>
                             <span className="text-xl font-bold tracking-tight">ResumeAI</span>
                         </div>

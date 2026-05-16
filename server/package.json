@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "server": "nodemon server.js"
+    "server": "nodemon server.js",
+    "build:fonts": "node download_fonts.js",
+    "postinstall": "npm run build:fonts"
   },
   "keywords": [],
   "author": "",

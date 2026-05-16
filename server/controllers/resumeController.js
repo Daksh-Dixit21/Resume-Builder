@@ -2,7 +2,28 @@ import Resume from "../models/Resume.js";
 import User from "../models/User.js";
 import Imagekit from "../configs/imageKit.js";
 import fs from "fs";
+import path from "path";
+import { fileURLToPath } from 'url';
 import puppeteer from "puppeteer";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+let fontManifest = {};
+const loadManifest = () => {
+    try {
+        const manifestPath = path.resolve(__dirname, '../configs/fonts_manifest.json');
+        if (fs.existsSync(manifestPath)) {
+            fontManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+            console.log("Font manifest loaded successfully");
+        } else {
+            console.warn("Font manifest not found at:", manifestPath);
+        }
+    } catch (e) {
+        console.error("Failed to load font manifest:", e);
+    }
+};
+loadManifest();
 
 export const createResume = async (req, res) => {
     try {
@@ -177,32 +198,56 @@ export const updateResume = async (req, res) => {
 export const downloadPdf = async (req, res) => {
     let browser;
     try {
-        const { html, css } = req.body;
+        const { html, css, scale } = req.body;
 
         if (!html) {
             return res.status(400).json({ message: "HTML content is required" });
         }
 
-        browser = await puppeteer.launch({
-            headless: 'new',
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage', // critical for docker
-                '--disable-gpu'
-            ]
-        });
+        const scaleFactor = parseFloat(scale) || 1;
+
+        const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN;
+
+        if (BROWSERLESS_TOKEN) {
+            browser = await puppeteer.connect({
+                browserWSEndpoint: `wss://production-sfo.browserless.io?token=${BROWSERLESS_TOKEN}`
+            });
+        } else {
+            browser = await puppeteer.launch({
+                headless: 'new',
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-gpu'
+                ]
+            });
+        }
+
         const page = await browser.newPage();
-        page.setDefaultNavigationTimeout(120000);
         
-        // Set viewport to standard A4 resolution at 96 DPI
         await page.setViewport({
             width: 794,
             height: 1123,
             deviceScaleFactor: 1,
         });
 
-        // Construct the full HTML document with a robust font stack and Google Fonts
+        // Precision font detection: check if font family is mentioned in CSS style rules
+        let injectedFontsCss = '';
+        Object.keys(fontManifest).forEach(family => {
+            const familyRegex = new RegExp(`font-family:\\s*['"]?${family}['"]?`, 'i');
+            if (familyRegex.test(css || '')) {
+                injectedFontsCss += fontManifest[family];
+            }
+        });
+
+        // Robust Fallback: if no fonts detected or manifest failed to load
+        if (!injectedFontsCss) {
+            injectedFontsCss = fontManifest['Outfit'] || '';
+        }
+
+        const sanitizedCss = (css || '').replace(/@import\s+url\(['"]https:\/\/fonts\.googleapis\.com\/[^'"]+['"]\);?/g, '');
+
         const fullHtml = `
             <!DOCTYPE html>
             <html lang="en">
@@ -210,11 +255,9 @@ export const downloadPdf = async (req, res) => {
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Resume</title>
-                <link rel="preconnect" href="https://fonts.googleapis.com">
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-                <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Raleway:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
                 <style>
-                    ${css || ''}
+                    ${injectedFontsCss}
+                    ${sanitizedCss}
                     @page { 
                         size: A4; 
                         margin: 0; 
@@ -226,9 +269,13 @@ export const downloadPdf = async (req, res) => {
                         padding: 0;
                         font-family: 'Outfit', 'Montserrat', 'Raleway', 'Playfair Display', ui-sans-serif, system-ui, sans-serif;
                     }
+                    #pdf-content {
+                        width: 794px; /* Fixed A4 width for stability */
+                        margin: 0 auto;
+                    }
                     #resume-preview {
                         width: 100% !important;
-                        height: 100% !important;
+                        height: auto !important;
                         margin: 0 !important;
                         padding: 0 !important;
                         border: none !important;
@@ -243,18 +290,23 @@ export const downloadPdf = async (req, res) => {
             </html>
         `;
 
+        // Use domcontentloaded for speed, as fonts are now local
         await page.setContent(fullHtml, { 
             waitUntil: 'domcontentloaded', 
-            timeout: 120000 
+            timeout: 30000 
         });
-        
-        // Ensure all fonts are loaded
+
+        // Manually wait for images (like profile photos) to load without depending on networkidle
         await page.evaluate(async () => {
-            await document.fonts.ready;
+            const images = Array.from(document.querySelectorAll('img'));
+            await Promise.all(images.map(img => {
+                if (img.complete) return Promise.resolve();
+                return new Promise((resolve) => {
+                    img.addEventListener('load', resolve, { once: true });
+                    img.addEventListener('error', resolve, { once: true });
+                });
+            }));
         });
-        
-        // Small delay to ensure layout engine catches up with fonts
-        await page.waitForTimeout(1000);
         
         await page.emulateMediaType('print');
 
@@ -262,12 +314,8 @@ export const downloadPdf = async (req, res) => {
             format: 'A4',
             printBackground: true,
             preferCSSPageSize: true,
-            margin: {
-                top: '0px',
-                right: '0px',
-                bottom: '0px',
-                left: '0px'
-            }
+            scale: scaleFactor, // Native high-quality scaling
+            margin: { top: '0px', right: '0px', bottom: '0px', left: '0px' }
         });
 
         res.set({
@@ -280,9 +328,9 @@ export const downloadPdf = async (req, res) => {
 
     } catch (error) {
         console.error("PDF Generation Error:", error);
-        return res.status(500).json({ message: "Failed to generate PDF" });
+        return res.status(500).json({ message: "Failed to generate PDF." });
     } finally {
-        if (browser) {
+        if (browser && browser.isConnected()) {
             await browser.close().catch(() => {});
         }
     }

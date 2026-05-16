@@ -56,3 +56,24 @@ export const duplicateCoverLetter = async (req, res) => {
         return res.status(400).json({ message: error.message });
     }
 };
+export const updateCoverLetter = async (req, res) => {
+    try {
+        const userId = req.userId;
+        const { id } = req.params;
+        const { title, content, hiringManager, company } = req.body;
+        
+        const coverLetter = await CoverLetter.findOneAndUpdate(
+            { userId, _id: id },
+            { title, content, hiringManager, company },
+            { new: true }
+        );
+
+        if (!coverLetter) {
+            return res.status(404).json({ message: 'Cover letter not found' });
+        }
+
+        return res.status(200).json({ message: 'Cover letter updated successfully', coverLetter });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};

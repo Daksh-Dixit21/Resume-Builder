@@ -132,8 +132,8 @@ const Hero = () => {
                 {/* Navbar */}
                 <nav className="relative z-50 flex items-center justify-between w-full py-4 px-6 md:px-16 lg:px-24 xl:px-40">
                     <Link to="/" className="flex items-center gap-2.5">
-                        <div className="size-9 rounded-xl bg-linear-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                            <FileText size={18} className="text-white" />
+                        <div className="size-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 font-black text-xl text-white">
+                            R
                         </div>
                         <span className="text-xl font-bold tracking-tight text-white">ResumeAI</span>
                     </Link>

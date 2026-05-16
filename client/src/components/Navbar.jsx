@@ -20,12 +20,12 @@ const Navbar = () => {
     const isActive = (path) => location.pathname === path
 
     return (
-    <div className='bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 shadow-sm'>
+    <div className='bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 shadow-sm print:hidden'>
         <nav className='flex items-center justify-between max-w-7xl mx-auto px-4 md:px-8 py-3.5'>
             <div className='flex items-center gap-10'>
                 <Link to='/' className='flex items-center gap-2.5 shrink-0'>
-                    <div className="size-9 rounded-xl bg-linear-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                        <FileText size={18} className="text-white" />
+                    <div className="size-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 font-black text-xl text-white">
+                        R
                     </div>
                     <span className="text-xl font-bold tracking-tight text-slate-800">ResumeAI</span>
                 </Link>

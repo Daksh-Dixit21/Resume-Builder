@@ -11,7 +11,11 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
+      - key: IMAGEKIT_PUBLIC_KEY
+        sync: false
       - key: IMAGEKIT_PRIVATE_KEY
+        sync: false
+      - key: IMAGEKIT_URL_ENDPOINT
         sync: false
       - key: OPENAI_API_KEY
         sync: false

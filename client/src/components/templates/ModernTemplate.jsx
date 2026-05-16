@@ -57,7 +57,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 
 				<ul className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] list-none p-0 m-0" aria-label="Contact Details">
 					{data.personal_info?.email && (
-						<li>
+						<li className="whitespace-nowrap">
 							<a 
 								href={`mailto:${data.personal_info.email}`}
 								aria-label="Email Address"

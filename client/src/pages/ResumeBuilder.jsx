@@ -56,6 +56,9 @@ const ResumeBuilder = () => {
   const [isMatching, setIsMatching] = useState(false)
   const [matchAnalysis, setMatchAnalysis] = useState(null)
 
+  const [autoFit, setAutoFit] = useState(false)
+  const [zoomFactor, setZoomFactor] = useState(1)
+
   const sections = [
     {id: "personal", name: "Personal Info", icon: User},
     {id: "summary", name: "Summary", icon: FileText},
@@ -118,6 +121,33 @@ const ResumeBuilder = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [undo, redo, canUndo, canRedo]);
+
+  // Smart Fit Logic
+  useEffect(() => {
+    const calculateFit = () => {
+      const el = document.getElementById('resume-preview-container');
+      if (!el || !autoFit) {
+        setZoomFactor(1);
+        return;
+      }
+
+      const A4_HEIGHT = 1123;
+      const currentHeight = el.scrollHeight;
+
+      // If it still overflows after CSS smart-fit (which is applied via class),
+      // we use a very mild zoom as a final adjustment.
+      if (currentHeight > A4_HEIGHT) {
+        // Calculate needed zoom (min 0.94 to maintain perfect readability)
+        const neededZoom = Math.max(0.94, A4_HEIGHT / currentHeight);
+        setZoomFactor(neededZoom);
+      } else {
+        setZoomFactor(1);
+      }
+    };
+
+    const timeout = setTimeout(calculateFit, 300);
+    return () => clearTimeout(timeout);
+  }, [resumeData, autoFit, activeSectionIndex]);
 
   const scanAts = async () => {
     setIsAnalyzing(true);
@@ -202,6 +232,10 @@ const ResumeBuilder = () => {
       }
 
       const clone = resumeElement.cloneNode(true);
+      if (autoFit && zoomFactor < 1) {
+          clone.style.zoom = zoomFactor;
+      }
+
       const images = clone.querySelectorAll('img');
       const imagePromises = Array.from(images).map(async (img) => {
         const src = img.src;
@@ -436,6 +470,21 @@ const ResumeBuilder = () => {
                     {isAnalyzing ? <Loader2 className='size-4 animate-spin'/> : <Activity className='size-4'/>}
                     Scan ATS
                   </button>
+
+                  {/* Smart Fit Toggle */}
+                  <button 
+                    onClick={() => setAutoFit(!autoFit)}
+                    className={`flex items-center gap-2 px-4 py-2 text-xs rounded-lg ring-1 transition-all ${
+                        autoFit 
+                        ? 'bg-indigo-600 text-white ring-indigo-600 shadow-md' 
+                        : 'bg-white text-indigo-600 ring-indigo-200 hover:bg-indigo-50'
+                    }`}
+                    title="Automatically scale to fit one page"
+                  >
+                    <Sparkles className={`size-4 ${autoFit ? 'animate-pulse' : ''}`}/>
+                    {autoFit ? `Smart Fit: ${Math.round(zoomFactor * 100)}%` : 'Smart Fit'}
+                  </button>
+
                   <button 
                     onClick={downloadResume} 
                     disabled={isDownloading}
@@ -445,10 +494,21 @@ const ResumeBuilder = () => {
                   </button>
                 </div>
                 </div>
-                <ResumePreview data={resumeData} template={resumeData.template} accentColor={resumeData.accent_color} classes={!isEditMode ? 'max-w-4xl mx-auto' : ''} showPageWarning={isEditMode} fontFamily={resumeData.font_family}/>
+                <div style={{ zoom: zoomFactor, transition: 'zoom 0.3s ease' }}>
+                  <ResumePreview 
+                    data={resumeData} 
+                    template={resumeData.template} 
+                    accentColor={resumeData.accent_color} 
+                    classes={`${!isEditMode ? 'max-w-4xl mx-auto' : ''} ${autoFit ? 'smart-fit' : ''}`} 
+                    showPageWarning={isEditMode && !autoFit} 
+                    fontFamily={resumeData.font_family}
+                  />
+                </div>
           </div>
         </div>
       </div>
+
+
 
       {/* ATS Analysis Modal */}
       {showAtsModal && atsAnalysis && (
@@ -538,116 +598,158 @@ const ResumeBuilder = () => {
 
       {/* Job Matcher Modal */}
       {showMatchModal && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm'>
-          <div className='bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col'>
-            <div className='p-6 border-b border-gray-100 flex justify-between items-center bg-linear-to-r from-indigo-50 to-white'>
-              <div className='flex items-center gap-3'>
-                <div className='p-2 bg-indigo-100 rounded-lg text-indigo-600'>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md animate-in fade-in duration-300'>
+          <div className='bg-white rounded-3xl shadow-[0_0_40px_rgba(79,70,229,0.15)] w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-300 border border-slate-200/50'>
+            {/* Ambient Background Glow */}
+            <div className='absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 blur-[100px] pointer-events-none rounded-full mix-blend-multiply'></div>
+            <div className='absolute bottom-0 left-0 w-96 h-96 bg-rose-500/10 blur-[100px] pointer-events-none rounded-full mix-blend-multiply'></div>
+
+            <div className='relative z-10 p-6 sm:p-8 border-b border-slate-100 flex justify-between items-center bg-white/50 backdrop-blur-xl'>
+              <div className='flex items-center gap-4'>
+                <div className='size-12 bg-linear-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white'>
                   <Target size={24} />
                 </div>
                 <div>
-                  <h2 className='text-xl font-bold text-gray-900'>Job Matcher</h2>
-                  <p className='text-sm text-gray-500'>Compare resume to job description</p>
+                  <h2 className='text-2xl font-black text-slate-900 tracking-tight'>Job Match Intelligence</h2>
+                  <p className='text-sm font-medium text-slate-500'>AI-powered alignment analysis</p>
                 </div>
               </div>
-              <button onClick={() => setShowMatchModal(false)} className='p-2 hover:bg-gray-100 rounded-full transition-colors'>
+              <button onClick={() => setShowMatchModal(false)} className='p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition-colors'>
                 <X size={20} />
               </button>
             </div>
 
-            <div className='flex-1 overflow-y-auto p-6'>
+            <div className='relative z-10 flex-1 overflow-y-auto p-6 sm:p-8 bg-slate-50/50'>
               {!matchAnalysis ? (
-                <div className='space-y-4'>
-                  <label className='block text-sm font-semibold text-slate-700'>
-                    Paste Job Description
-                  </label>
-                  <textarea
-                    value={matchJobDescription}
-                    onChange={(e) => setMatchJobDescription(e.target.value)}
-                    placeholder='Paste the target job description here...'
-                    rows={12}
-                    className='w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 resize-none'
-                  />
-                  <div className='flex justify-end'>
+                <div className='max-w-2xl mx-auto space-y-6'>
+                  <div className='text-center mb-8'>
+                    <div className='inline-flex items-center justify-center p-3 bg-indigo-50 rounded-2xl mb-4'>
+                      <Sparkles className='size-8 text-indigo-600' />
+                    </div>
+                    <h3 className='text-xl font-bold text-slate-900'>Paste Target Job Description</h3>
+                    <p className='text-sm text-slate-500 mt-2'>We'll cross-reference your resume against the employer's requirements to find missing keywords and formatting gaps.</p>
+                  </div>
+                  
+                  <div className='relative group'>
+                    <textarea
+                      value={matchJobDescription}
+                      onChange={(e) => setMatchJobDescription(e.target.value)}
+                      placeholder='Paste the full job description here (responsibilities, requirements, preferred qualifications)...'
+                      rows={12}
+                      className='w-full px-6 py-5 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all resize-none shadow-sm group-hover:border-slate-300 leading-relaxed text-slate-700'
+                    />
+                  </div>
+                  <div className='flex justify-center pt-2'>
                     <button 
                       onClick={matchJob}
-                      disabled={isMatching}
-                      className={`flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors ${isMatching ? 'opacity-70 cursor-not-allowed' : ''}`}
+                      disabled={isMatching || !matchJobDescription.trim()}
+                      className={`flex items-center justify-center gap-2 px-8 py-3.5 bg-slate-900 text-white rounded-xl text-sm font-bold transition-all shadow-xl shadow-slate-900/20 ${isMatching ? 'opacity-70 cursor-wait' : 'hover:-translate-y-0.5 hover:shadow-2xl hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0'}`}
                     >
-                      {isMatching ? <Loader2 className='size-4 animate-spin'/> : <Sparkles className='size-4'/>}
-                      {isMatching ? 'Analyzing Match...' : 'Analyze Match'}
+                      {isMatching ? <Loader2 className='size-5 animate-spin'/> : <Sparkles className='size-5 text-indigo-400'/>}
+                      {isMatching ? 'Analyzing Alignment...' : 'Analyze Job Match'}
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className='space-y-8'>
-                  <div className='flex flex-col items-center justify-center text-center'>
-                    <div className='relative flex items-center justify-center mb-4'>
-                      <svg className='w-32 h-32 transform -rotate-90'>
-                        <circle cx='64' cy='64' r='58' stroke='currentColor' strokeWidth='8' fill='transparent' className='text-gray-100' />
-                        <circle cx='64' cy='64' r='58' stroke='currentColor' strokeWidth='8' fill='transparent' strokeDasharray={364.4} strokeDashoffset={364.4 - (364.4 * matchAnalysis.matchScore) / 100} className={`${matchAnalysis.matchScore >= 75 ? 'text-green-500' : matchAnalysis.matchScore >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} />
+                <div className='space-y-10'>
+                  {/* Top Header: Score & Summary */}
+                  <div className='flex flex-col md:flex-row items-center gap-8 p-8 bg-white rounded-3xl border border-slate-200 shadow-sm'>
+                    <div className='relative flex items-center justify-center shrink-0'>
+                      <svg className='w-40 h-40 transform -rotate-90 drop-shadow-md'>
+                        <circle cx='80' cy='80' r='72' stroke='currentColor' strokeWidth='12' fill='transparent' className='text-slate-100' />
+                        <circle 
+                          cx='80' cy='80' r='72' stroke='currentColor' strokeWidth='12' fill='transparent' 
+                          strokeDasharray={452.4} 
+                          strokeDashoffset={452.4 - (452.4 * matchAnalysis.matchScore) / 100} 
+                          className={`${matchAnalysis.matchScore >= 75 ? 'text-emerald-500' : matchAnalysis.matchScore >= 50 ? 'text-amber-500' : 'text-rose-500'} transition-all duration-1500 ease-out`} 
+                          strokeLinecap='round'
+                        />
                       </svg>
-                      <span className='absolute text-3xl font-black text-gray-900'>{matchAnalysis.matchScore}%</span>
+                      <div className='absolute flex flex-col items-center justify-center'>
+                        <span className='text-4xl font-black text-slate-900 tracking-tighter'>{matchAnalysis.matchScore}%</span>
+                        <span className='text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1'>Match</span>
+                      </div>
                     </div>
-                    <h3 className='text-lg font-bold text-gray-800'>Match Score</h3>
-                    <p className='text-gray-600 mt-2 max-w-lg'>{matchAnalysis.gapAnalysis}</p>
+                    <div className='text-center md:text-left flex-1'>
+                      <h3 className='text-2xl font-bold text-slate-900 mb-2'>Alignment Analysis</h3>
+                      <p className='text-slate-600 leading-relaxed text-sm'>{matchAnalysis.gapAnalysis}</p>
+                    </div>
                   </div>
 
-                  <div className='grid md:grid-cols-2 gap-6'>
-                    <div className='space-y-3'>
-                      <h4 className='flex items-center gap-2 font-bold text-gray-900 text-sm uppercase tracking-wider'>
-                        <Check size={16} className='text-green-500' /> Matched Keywords
-                      </h4>
-                      <div className='flex flex-wrap gap-2'>
+                  {/* Keywords Grid */}
+                  <div className='grid lg:grid-cols-2 gap-6'>
+                    {/* Matched Keywords */}
+                    <div className='bg-white p-6 rounded-3xl border border-slate-200 shadow-sm'>
+                      <div className='flex items-center gap-3 mb-6'>
+                        <div className='p-2 bg-emerald-50 rounded-xl'>
+                          <Check size={20} className='text-emerald-600' />
+                        </div>
+                        <div>
+                          <h4 className='font-bold text-slate-900'>Keywords Found</h4>
+                          <p className='text-xs font-medium text-slate-500'>Terms present in your resume</p>
+                        </div>
+                      </div>
+                      <div className='flex flex-wrap gap-2.5'>
                         {matchAnalysis.matchedKeywords.length > 0 ? matchAnalysis.matchedKeywords.map((kw, i) => (
-                          <span key={i} className='px-2 py-1 bg-green-50 text-green-700 rounded text-xs font-medium border border-green-100'>
+                          <span key={i} className='px-3 py-1.5 bg-emerald-50/50 text-emerald-700 rounded-lg text-xs font-bold border border-emerald-100/50 shadow-sm'>
                             {kw}
                           </span>
-                        )) : <p className='text-sm text-slate-500'>No significant matches found.</p>}
+                        )) : <p className='text-sm text-slate-400 font-medium w-full text-center py-4 bg-slate-50 rounded-xl border border-dashed border-slate-200'>No significant matches found.</p>}
                       </div>
                     </div>
 
-                    <div className='space-y-3'>
-                      <h4 className='flex items-center gap-2 font-bold text-gray-900 text-sm uppercase tracking-wider'>
-                        <AlertCircle size={16} className='text-red-500' /> Missing Keywords
-                      </h4>
-                      <div className='flex flex-wrap gap-2'>
+                    {/* Missing Keywords */}
+                    <div className='bg-white p-6 rounded-3xl border border-slate-200 shadow-sm'>
+                      <div className='flex items-center gap-3 mb-6'>
+                        <div className='p-2 bg-rose-50 rounded-xl'>
+                          <AlertCircle size={20} className='text-rose-600' />
+                        </div>
+                        <div>
+                          <h4 className='font-bold text-slate-900'>Missing Keywords</h4>
+                          <p className='text-xs font-medium text-slate-500'>Crucial terms missing from your resume</p>
+                        </div>
+                      </div>
+                      <div className='flex flex-wrap gap-2.5'>
                         {matchAnalysis.missingKeywords.length > 0 ? matchAnalysis.missingKeywords.map((kw, i) => (
-                          <span key={i} className='px-2 py-1 bg-red-50 text-red-700 rounded text-xs font-medium border border-red-100'>
+                          <span key={i} className='px-3 py-1.5 bg-rose-50/50 text-rose-700 rounded-lg text-xs font-bold border border-rose-100/50 shadow-sm'>
                             {kw}
                           </span>
-                        )) : <p className='text-sm text-slate-500'>You hit all the key requirements!</p>}
+                        )) : <p className='text-sm text-slate-400 font-medium w-full text-center py-4 bg-slate-50 rounded-xl border border-dashed border-slate-200'>You hit all the key requirements!</p>}
                       </div>
                     </div>
                   </div>
 
-                  <div className='space-y-4 pt-4 border-t border-slate-100'>
-                    <h4 className='flex items-center gap-2 font-bold text-gray-900 text-sm uppercase tracking-wider'>
-                      <Sparkles size={16} className='text-indigo-500' /> Actionable Suggestions
-                    </h4>
-                    <ul className='space-y-3'>
+                  {/* Suggestions Section */}
+                  <div className='bg-indigo-50/50 p-6 sm:p-8 rounded-3xl border border-indigo-100'>
+                    <div className='flex items-center gap-3 mb-6'>
+                      <div className='p-2 bg-indigo-100 rounded-xl'>
+                        <Sparkles size={20} className='text-indigo-600' />
+                      </div>
+                      <h4 className='text-lg font-bold text-slate-900'>Actionable Strategies</h4>
+                    </div>
+                    <div className='grid gap-4'>
                       {matchAnalysis.suggestions.map((suggestion, i) => (
-                        <li key={i} className='flex items-start gap-3 bg-slate-50 p-3 rounded-lg border border-slate-100 text-sm text-slate-700'>
-                          <div className='mt-0.5 size-5 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0 font-bold text-xs'>
+                        <div key={i} className='flex gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:border-indigo-200 transition-colors'>
+                          <div className='mt-0.5 size-7 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 font-black text-xs'>
                             {i+1}
                           </div>
-                          {suggestion}
-                        </li>
+                          <p className='text-sm text-slate-700 font-medium leading-relaxed'>{suggestion}</p>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className='p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3'>
+            <div className='relative z-10 p-6 border-t border-slate-100 bg-white/50 backdrop-blur-xl flex justify-end gap-3'>
               {matchAnalysis && (
-                <button onClick={() => setMatchAnalysis(null)} className='px-6 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-100 transition-all'>
+                <button onClick={() => setMatchAnalysis(null)} className='px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all'>
                   New Analysis
                 </button>
               )}
-              <button onClick={() => setShowMatchModal(false)} className='px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-all'>
-                Close
+              <button onClick={() => setShowMatchModal(false)} className='px-6 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-md shadow-slate-900/10'>
+                Done
               </button>
             </div>
           </div>

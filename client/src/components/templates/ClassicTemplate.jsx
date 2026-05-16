@@ -61,7 +61,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
                             href={`mailto:${data.personal_info.email}`} 
                             aria-label="Email Address"
                             title="Email"
-                            className="flex items-center gap-1"
+                            className="flex items-center gap-1 whitespace-nowrap"
                         >
                             <Mail className="size-3" aria-label="Email Logo" role="img" />
                             <span>{data.personal_info.email}</span>
