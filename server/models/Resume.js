@@ -29,6 +29,7 @@ experience: [
     start_date: {type: String},
     end_date: {type: String},
     description: {type: String},
+    link: {type: String},
     is_current: { type: Boolean},
   }
   ],

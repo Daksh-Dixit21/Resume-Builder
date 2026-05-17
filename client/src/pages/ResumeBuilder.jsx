@@ -604,24 +604,31 @@ const ResumeBuilder = () => {
             <div className='absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 blur-[100px] pointer-events-none rounded-full mix-blend-multiply'></div>
             <div className='absolute bottom-0 left-0 w-96 h-96 bg-rose-500/10 blur-[100px] pointer-events-none rounded-full mix-blend-multiply'></div>
 
-            <div className='relative z-10 p-6 sm:p-8 border-b border-slate-100 flex justify-between items-center bg-white/50 backdrop-blur-xl'>
-              <div className='flex items-center gap-4'>
-                <div className='size-12 bg-linear-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white'>
+            <div className='relative z-10 p-6 border-b border-gray-100 flex justify-between items-center bg-linear-to-r from-indigo-50 to-white'>
+              <div className='flex items-center gap-3'>
+                <div className='p-2 bg-indigo-100 rounded-lg text-indigo-600'>
                   <Target size={24} />
                 </div>
                 <div>
-                  <h2 className='text-2xl font-black text-slate-900 tracking-tight'>Job Match Intelligence</h2>
-                  <p className='text-sm font-medium text-slate-500'>AI-powered alignment analysis</p>
+                  <h2 className='text-xl font-bold text-gray-900'>Job Match Intelligence</h2>
+                  <p className='text-sm text-gray-500'>Powered by AI Analysis</p>
                 </div>
               </div>
-              <button onClick={() => setShowMatchModal(false)} className='p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition-colors'>
-                <X size={20} />
-              </button>
+              <div className='flex items-center gap-2'>
+                {matchAnalysis && (
+                  <button onClick={() => setMatchAnalysis(null)} className='text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors uppercase tracking-widest'>
+                    New Analysis
+                  </button>
+                )}
+                <button onClick={() => setShowMatchModal(false)} className='p-2 hover:bg-gray-100 rounded-full transition-colors'>
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
-            <div className='relative z-10 flex-1 overflow-y-auto p-6 sm:p-8 bg-slate-50/50'>
+            <div className='relative z-10 flex-1 overflow-y-auto p-6 sm:p-8 bg-white'>
               {!matchAnalysis ? (
-                <div className='max-w-2xl mx-auto space-y-6'>
+                <div className='max-w-2xl mx-auto space-y-6 py-10'>
                   <div className='text-center mb-8'>
                     <div className='inline-flex items-center justify-center p-3 bg-indigo-50 rounded-2xl mb-4'>
                       <Sparkles className='size-8 text-indigo-600' />
@@ -653,7 +660,7 @@ const ResumeBuilder = () => {
               ) : (
                 <div className='space-y-10'>
                   {/* Top Header: Score & Summary */}
-                  <div className='flex flex-col md:flex-row items-center gap-8 p-8 bg-white rounded-3xl border border-slate-200 shadow-sm'>
+                  <div className='flex flex-col md:flex-row items-center gap-8 p-8 bg-slate-50 rounded-3xl border border-slate-100 shadow-sm'>
                     <div className='relative flex items-center justify-center shrink-0'>
                       <svg className='w-40 h-40 transform -rotate-90 drop-shadow-md'>
                         <circle cx='80' cy='80' r='72' stroke='currentColor' strokeWidth='12' fill='transparent' className='text-slate-100' />
@@ -740,17 +747,6 @@ const ResumeBuilder = () => {
                   </div>
                 </div>
               )}
-            </div>
-
-            <div className='relative z-10 p-6 border-t border-slate-100 bg-white/50 backdrop-blur-xl flex justify-end gap-3'>
-              {matchAnalysis && (
-                <button onClick={() => setMatchAnalysis(null)} className='px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all'>
-                  New Analysis
-                </button>
-              )}
-              <button onClick={() => setShowMatchModal(false)} className='px-6 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-md shadow-slate-900/10'>
-                Done
-              </button>
             </div>
           </div>
         </div>

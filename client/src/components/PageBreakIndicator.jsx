@@ -8,15 +8,16 @@ const PageBreakIndicator = ({ children, enabled = false }) => {
     const [containerHeight, setContainerHeight] = useState(0);
 
     // A4 height is 297mm ≈ 11.69 inches. 
-    // At 96 DPI, this is exactly 1123 pixels.
-    const A4_PAGE_HEIGHT = 1123; 
+    // At 96 DPI, this is 1122.24 pixels. We use 1128 for a better visual buffer.
+    const A4_PAGE_HEIGHT = 1128; 
 
     useEffect(() => {
         const checkHeight = () => {
             if (enabled && containerRef.current) {
                 const height = containerRef.current.offsetHeight;
                 setContainerHeight(height);
-                setShowWarning(height > A4_PAGE_HEIGHT - 50); // Warn when getting close
+                // Increased warning threshold for better user awareness
+                setShowWarning(height > A4_PAGE_HEIGHT - 60); 
                 setIsOverflowing(height > A4_PAGE_HEIGHT);
             }
         };

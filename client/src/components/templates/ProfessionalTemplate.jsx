@@ -33,7 +33,7 @@ const ProfessionalTemplate = ({ data, accentColor }) => {
 
 
 	return (
-<div className="w-full bg-white text-slate-900">
+<div className="w-full bg-white text-slate-900 professional-template">
 			{/* Header */}
 			<header className="py-4 px-8 border-b-2" style={{ borderBottomColor: accentColor }} aria-label="Personal Information">
 				<div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3">
@@ -179,11 +179,11 @@ const ProfessionalTemplate = ({ data, accentColor }) => {
 				</div>
 
 				{/* Right Sidebar Column */}
-				<div className="md:col-span-4 space-y-7">
+				<div className="md:col-span-4 space-y-6">
 					{/* Education */}
 					{data.education && data.education.length > 0 && (
 						<section aria-labelledby="education-heading">
-							<h2 id="education-heading" className="text-xs font-black mb-4 uppercase tracking-[0.2em] text-slate-400 border-b pb-2">
+							<h2 id="education-heading" className="text-xs font-black mb-2.5 uppercase tracking-[0.2em] text-slate-400 border-b pb-2">
 								Education
 							</h2>
 							<div className="space-y-4">
@@ -210,37 +210,30 @@ const ProfessionalTemplate = ({ data, accentColor }) => {
 					{/* Skills */}
 					{data.skills && data.skills.length > 0 && (
 						<section aria-labelledby="skills-heading">
-							<h2 id="skills-heading" className="text-xs font-black mb-4 uppercase tracking-[0.2em] text-slate-400 border-b pb-2">
+							<h2 id="skills-heading" className="text-xs font-black mb-2.5 uppercase tracking-[0.2em] text-slate-400 border-b pb-2">
 								Expertise
 							</h2>
-							<div className="flex flex-col gap-4">
-								{data.skills.map((skill, index) => {
-									const hasColon = skill.includes(':');
-									if (hasColon) {
-										const [category, items] = skill.split(/:(.+)/);
-										return (
-											<div key={index} className="space-y-1.5">
-												<p className="text-[10px] font-black uppercase text-slate-500 tracking-wider">{category.trim()}</p>
-												<p className="text-[12px] text-slate-700 font-medium leading-relaxed">{items ? items.trim() : ""}</p>
-											</div>
-										);
-									}
-									return null;
+							<div className="flex flex-col gap-2.5">
+								{data.skills.filter(s => s.includes(':')).map((skill, index) => {
+									const [category, items] = skill.split(/:(.+)/);
+									return (
+										<div key={index} className="space-y-0.5">
+											<p className="text-[10px] font-black uppercase text-slate-500 tracking-wider">{category.trim()}</p>
+											<p className="text-[12px] text-slate-700 font-medium leading-relaxed">{items ? items.trim() : ""}</p>
+										</div>
+									);
 								})}
 								
 								{/* Non-categorized skills in a flow layout */}
-								<div className="flex flex-wrap gap-1.5">
-									{data.skills.map((skill, index) => {
-										if (!skill.includes(':')) {
-											return (
-												<span key={index} className="text-[11px] font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded uppercase tracking-tighter">
-													{skill}
-												</span>
-											);
-										}
-										return null;
-									})}
-								</div>
+								{data.skills.some(s => !s.includes(':')) && (
+									<div className="flex flex-wrap gap-1.5">
+										{data.skills.filter(s => !s.includes(':')).map((skill, index) => (
+											<span key={index} className="text-[11px] font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded uppercase tracking-tighter">
+												{skill}
+											</span>
+										))}
+									</div>
+								)}
 							</div>
 						</section>
 					)}
@@ -248,7 +241,7 @@ const ProfessionalTemplate = ({ data, accentColor }) => {
 					{/* Certifications */}
 					{data.certifications && data.certifications.length > 0 && (
 						<section aria-labelledby="certifications-heading">
-							<h2 id="certifications-heading" className="text-xs font-black mb-4 uppercase tracking-[0.2em] text-slate-400 border-b pb-2">
+							<h2 id="certifications-heading" className="text-xs font-black mb-2.5 uppercase tracking-[0.2em] text-slate-400 border-b pb-2">
 								Certifications
 							</h2>
 							<div className="space-y-4">
@@ -278,7 +271,7 @@ const ProfessionalTemplate = ({ data, accentColor }) => {
 					{/* Languages */}
 					{data.languages && data.languages.length > 0 && (
 						<section aria-labelledby="languages-heading">
-							<h2 id="languages-heading" className="text-xs font-black mb-4 uppercase tracking-[0.2em] text-slate-400 border-b pb-2">
+							<h2 id="languages-heading" className="text-xs font-black mb-2.5 uppercase tracking-[0.2em] text-slate-400 border-b pb-2">
 								Languages
 							</h2>
 							<div className="space-y-2">
